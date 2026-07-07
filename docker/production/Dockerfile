@@ -11,7 +11,6 @@
 
 FROM ubuntu:24.04
 
-ARG BAGISTO_VERSION=v2.4.0
 ARG PHP_VERSION=8.3
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -25,7 +24,6 @@ RUN apt-get update && apt-get install -y \
         apt-transport-https \
         ca-certificates \
         curl \
-        git \
         gnupg \
         software-properties-common \
         unzip \
@@ -108,9 +106,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 # ---------------------------------------------------------------------------
 WORKDIR /var/www/bagisto
 
-RUN git clone --depth 1 --branch ${BAGISTO_VERSION} \
-        https://github.com/bagisto/bagisto.git . \
-    && composer install \
+# Copy local project files (already cloned private repo)
+COPY --chown=www-data:www-data . .
+
+RUN composer install \
         --no-dev \
         --no-interaction \
         --prefer-dist \
@@ -146,29 +145,29 @@ RUN cp .env.example .env \
 #
 # The MySQL data directory (/var/lib/mysql) is baked into this layer.
 # ---------------------------------------------------------------------------
-COPY mysql-init.sql /docker-entrypoint-initdb.d/init.sql
-COPY build-install.sh /tmp/build-install.sh
+COPY docker/production/mysql-init.sql /docker-entrypoint-initdb.d/init.sql
+COPY docker/production/build-install.sh /tmp/build-install.sh
 RUN chmod +x /tmp/build-install.sh && bash /tmp/build-install.sh && rm /tmp/build-install.sh
 
 
 # ---------------------------------------------------------------------------
 # PHP configuration
 # ---------------------------------------------------------------------------
-COPY php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/99-production.ini
-COPY php-fpm.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
+COPY docker/production/php.ini /etc/php/${PHP_VERSION}/fpm/conf.d/99-production.ini
+COPY docker/production/php-fpm.conf /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 
 # ---------------------------------------------------------------------------
 # Nginx configuration
 # ---------------------------------------------------------------------------
 RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/bagisto.conf
+COPY docker/production/nginx.conf /etc/nginx/conf.d/bagisto.conf
 
 
 # ---------------------------------------------------------------------------
 # Supervisor configuration
 # ---------------------------------------------------------------------------
-COPY supervisord.conf /etc/supervisor/conf.d/bagisto.conf
+COPY docker/production/supervisord.conf /etc/supervisor/conf.d/bagisto.conf
 
 
 # ---------------------------------------------------------------------------
@@ -188,15 +187,14 @@ RUN chown -R www-data:www-data /var/www/bagisto \
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
 # ---------------------------------------------------------------------------
-# Cleanup — remove git (not needed at runtime)
+# Cleanup
 # ---------------------------------------------------------------------------
-RUN apt-get purge -y git \
-    && apt-get autoremove -y \
+RUN apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
