@@ -4,6 +4,7 @@ namespace TeraDevelopers\BagistoDaftraSync\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use TeraDevelopers\BagistoDaftraSync\Services\InvoiceSyncService;
 
 class BagistoDaftraSyncServiceProvider extends ServiceProvider
 {
@@ -30,9 +31,11 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'bagistodaftrasync');
 
-        Event::listen('bagisto.admin.layout.head', function($viewRenderEventManager) {
+        Event::listen('bagisto.admin.layout.head', function ($viewRenderEventManager) {
             $viewRenderEventManager->addTemplate('bagistodaftrasync::admin.layouts.style');
         });
+
+        Event::listen('sales.invoice.save.after', [InvoiceSyncService::class, 'handle']);
     }
 
     /**
@@ -43,11 +46,13 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->mergeConfigFrom(
-            dirname(__DIR__) . '/Config/admin-menu.php', 'menu.admin'
+            dirname(__DIR__) . '/Config/admin-menu.php',
+            'menu.admin'
         );
 
         $this->mergeConfigFrom(
-            dirname(__DIR__) . '/Config/acl.php', 'acl'
+            dirname(__DIR__) . '/Config/acl.php',
+            'acl'
         );
     }
 }
