@@ -42,16 +42,17 @@ use Webkul\Stripe\Providers\StripeServiceProvider;
 use Webkul\Tax\Providers\TaxServiceProvider;
 use Webkul\Theme\Providers\ThemeServiceProvider;
 use Webkul\User\Providers\UserServiceProvider;
+use TeraDevelopers\BagistoDaftraSync\Providers\BagistoDaftraSyncServiceProvider;
 
 return [
-    /**
-     * Application service providers.
-     */
+        /**
+         * Application service providers.
+         */
     AppServiceProvider::class,
 
-    /**
-     * Webkul's service providers.
-     */
+        /**
+         * Webkul's service providers.
+         */
     AdminServiceProvider::class,
     AttributeServiceProvider::class,
     BookingProductServiceProvider::class,
@@ -93,4 +94,5 @@ return [
     TaxServiceProvider::class,
     ThemeServiceProvider::class,
     UserServiceProvider::class,
+    BagistoDaftraSyncServiceProvider::class,
 ];
