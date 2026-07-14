@@ -4,6 +4,7 @@ namespace TeraDevelopers\BagistoDaftraSync\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use TeraDevelopers\BagistoDaftraSync\Jobs\SyncCustomerToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncInvoiceToDaftraJob;
 
 class BagistoDaftraSyncServiceProvider extends ServiceProvider
@@ -33,6 +34,13 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
 
         Event::listen('bagisto.admin.layout.head', function ($viewRenderEventManager) {
             $viewRenderEventManager->addTemplate('bagistodaftrasync::admin.layouts.style');
+        });
+
+        // Dispatch a background job when a customer registers.
+        // The job syncs the new customer to Daftra asynchronously so the
+        // registration HTTP response is never blocked.
+        Event::listen('customer.registration.after', function ($customer) {
+            SyncCustomerToDaftraJob::dispatch($customer);
         });
 
         // Dispatch a background job when a Bagisto invoice is saved.
