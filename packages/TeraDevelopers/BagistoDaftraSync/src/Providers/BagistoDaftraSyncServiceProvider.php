@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use TeraDevelopers\BagistoDaftraSync\Jobs\DeleteClientOnDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncCustomerToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncInvoiceToDaftraJob;
+use TeraDevelopers\BagistoDaftraSync\Jobs\SyncRefundToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\UpdateClientOnDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
 use Webkul\Customer\Models\Customer;
@@ -71,6 +72,13 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
         // response is never blocked.
         Event::listen('sales.invoice.save.after', function ($invoice) {
             SyncInvoiceToDaftraJob::dispatch($invoice);
+        });
+
+        // Dispatch a background job when a Bagisto refund is saved.
+        // The job handles all Daftra API calls asynchronously so the admin
+        // response is never blocked.
+        Event::listen('sales.refund.save.after', function ($refund) {
+            SyncRefundToDaftraJob::dispatch($refund);
         });
     }
 
