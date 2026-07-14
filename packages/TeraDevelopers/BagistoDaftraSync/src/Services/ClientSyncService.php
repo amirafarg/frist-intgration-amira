@@ -74,4 +74,57 @@ class ClientSyncService
             "Daftra client creation failed for customer #{$customer->id} (HTTP {$response->status()})"
         );
     }
+
+    /**
+     * Push updated customer fields to the existing Daftra client.
+     * Returns false (skip) if no mapping exists yet — the customer will be
+     * created on their next invoice sync or via the registration job.
+     * Throws on API failure so the calling job can retry.
+     *
+     * @throws \RuntimeException
+     */
+    public function update(Customer $customer): bool
+    {
+        $mapping = DaftraClientMapping::where('customer_id', $customer->id)->first();
+
+        if (! $mapping) {
+            Log::info('[DaftraSync] Skipping update — no Daftra client mapping found.', [
+                'customer_id' => $customer->id,
+            ]);
+
+            return false;
+        }
+
+        $subdomain = config('daftra.subdomain');
+        $apiKey = config('daftra.api_key');
+        $url = "https://{$subdomain}.daftra.com/api2/clients/{$mapping->daftra_client_id}.json";
+
+        $response = Http::withHeaders([
+            'APIKEY' => $apiKey,
+            'Accept' => 'application/json',
+        ])->put($url, [
+            'Client' => [
+                'business_name' => trim($customer->first_name.' '.$customer->last_name) ?: 'Customer '.$customer->id,
+                'first_name' => $customer->first_name,
+                'last_name' => $customer->last_name,
+                'email' => $customer->email,
+                'phone1' => $customer->phone,
+            ],
+        ]);
+
+        if ($response->status() === 200) {
+            return true;
+        }
+
+        Log::error('[DaftraSync] Failed to update Daftra client', [
+            'customer_id' => $customer->id,
+            'daftra_client_id' => $mapping->daftra_client_id,
+            'status' => $response->status(),
+            'response' => $response->json(),
+        ]);
+
+        throw new \RuntimeException(
+            "Daftra client update failed for customer #{$customer->id} (HTTP {$response->status()})"
+        );
+    }
 }

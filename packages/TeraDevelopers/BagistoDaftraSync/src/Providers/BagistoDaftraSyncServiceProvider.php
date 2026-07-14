@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncCustomerToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncInvoiceToDaftraJob;
+use TeraDevelopers\BagistoDaftraSync\Jobs\UpdateClientOnDaftraJob;
 
 class BagistoDaftraSyncServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,13 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
         // registration HTTP response is never blocked.
         Event::listen('customer.registration.after', function ($customer) {
             SyncCustomerToDaftraJob::dispatch($customer);
+        });
+
+        // Dispatch a background job when a customer profile is updated.
+        // Covers both admin edits (/admin/customers) and storefront profile
+        // edits (/customer/account/profile/edit) — both fire the same event.
+        Event::listen('customer.update.after', function ($customer) {
+            UpdateClientOnDaftraJob::dispatch($customer);
         });
 
         // Dispatch a background job when a Bagisto invoice is saved.
