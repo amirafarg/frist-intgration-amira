@@ -9,6 +9,7 @@ use TeraDevelopers\BagistoDaftraSync\Jobs\SyncCustomerToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncInvoiceToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\UpdateClientOnDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
+use Webkul\Customer\Models\Customer;
 
 class BagistoDaftraSyncServiceProvider extends ServiceProvider
 {
@@ -53,10 +54,11 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
             UpdateClientOnDaftraJob::dispatch($customer);
         });
 
-        // Listen BEFORE the customer is deleted so we can still read the
-        // daftra_client_id from the mapping table (it still exists at this point).
-        // The job then cleans up the local mapping AND removes the client on Daftra.
-        Event::listen('customer.delete.before', function ($customer) {
+        // Listen BEFORE the customer is deleted using the generic Eloquent model event.
+        // This is required because Bagisto's individual "Delete" button does NOT fire
+        // the custom 'customer.delete.before' event (only mass-delete does).
+        // The job cleans up the local mapping AND removes the client on Daftra.
+        Customer::deleting(function ($customer) {
             $mapping = DaftraClientMapping::where('customer_id', $customer->id)->first();
 
             if ($mapping) {
