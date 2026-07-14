@@ -24,20 +24,23 @@ class InvoiceSyncService
         $apiKey = config('daftra.api_key');
         $url = "https://{$subdomain}.daftra.com/api2/invoices";
 
-        $lineItems = $invoice->items->map(fn ($item) => [
-            'product_title' => $item->name,
+        $lineItems = $invoice->items->map(fn($item) => [
+            'item' => $item->name,
+            'description' => $item->description ?? $item->sku,
             'quantity' => $item->qty,
             'unit_price' => round((float) $item->price, 4),
-            'discount' => round((float) $item->discount_percent, 4),
-            'tax' => round((float) $item->tax_amount, 4),
+            'discount' => round((float) $item->discount_amount, 4),
+            'discount_type' => 2, // 2 = Value (Amount)
         ])->values()->all();
 
         $payload = [
             'Invoice' => [
                 'client_id' => $daftraClientId,
-                'reference_num' => $invoice->increment_id ?? (string) $invoice->id,
+                'no' => $invoice->increment_id ?? (string) $invoice->id,
                 'date' => $invoice->created_at->format('Y-m-d'),
-                'staff_notes' => 'Synced from Bagisto order #'.($invoice->order->increment_id ?? $invoice->order_id),
+                'notes' => 'Synced from Bagisto order #' . ($invoice->order->increment_id ?? $invoice->order_id),
+                'shipping_amount' => round((float) $invoice->shipping_amount, 4),
+                'discount_amount' => round((float) $invoice->discount_amount, 4),
             ],
             'InvoiceItem' => $lineItems,
         ];
