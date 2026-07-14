@@ -127,4 +127,68 @@ class ClientSyncService
             "Daftra client update failed for customer #{$customer->id} (HTTP {$response->status()})"
         );
     }
+
+    /**
+     * Delete a Daftra client by their Daftra ID.
+     *
+     * Response handling:
+     *   200 → deleted successfully, return true
+     *   404 → already gone (idempotent), return true
+     *   400 → client has transactions; Daftra won't allow deletion.
+     *          Log a warning and return false — do NOT throw, no retry.
+     *   5xx / network → throw RuntimeException so the job retries.
+     *
+     * @throws \RuntimeException
+     */
+    public function delete(int $daftraClientId): bool
+    {
+        $subdomain = config('daftra.subdomain');
+        $apiKey = config('daftra.api_key');
+        $url = "https://{$subdomain}.daftra.com/api2/clients/{$daftraClientId}.json";
+
+        $response = Http::withHeaders([
+            'APIKEY' => $apiKey,
+            'Accept' => 'application/json',
+        ])->delete($url);
+
+        // 200 — deleted successfully.
+        if ($response->status() === 200) {
+            Log::info('[DaftraSync] Daftra client deleted successfully.', [
+                'daftra_client_id' => $daftraClientId,
+            ]);
+
+            return true;
+        }
+
+        // 404 — already gone; treat as success (idempotent).
+        if ($response->status() === 404) {
+            Log::info('[DaftraSync] Daftra client not found on delete — already removed.', [
+                'daftra_client_id' => $daftraClientId,
+            ]);
+
+            return true;
+        }
+
+        // 400 — client has linked transactions; Daftra refuses deletion.
+        // We still clean up the local mapping but do NOT retry.
+        if ($response->status() === 400) {
+            Log::warning('[DaftraSync] Daftra client cannot be deleted — has existing transactions.', [
+                'daftra_client_id' => $daftraClientId,
+                'response' => $response->json(),
+            ]);
+
+            return false;
+        }
+
+        // Any other failure (5xx, network, etc.) — throw so the job retries.
+        Log::error('[DaftraSync] Failed to delete Daftra client.', [
+            'daftra_client_id' => $daftraClientId,
+            'status' => $response->status(),
+            'response' => $response->json(),
+        ]);
+
+        throw new \RuntimeException(
+            "Daftra client deletion failed for Daftra client #{$daftraClientId} (HTTP {$response->status()})"
+        );
+    }
 }

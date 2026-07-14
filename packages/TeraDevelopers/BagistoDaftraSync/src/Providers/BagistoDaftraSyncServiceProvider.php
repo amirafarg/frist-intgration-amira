@@ -4,9 +4,11 @@ namespace TeraDevelopers\BagistoDaftraSync\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use TeraDevelopers\BagistoDaftraSync\Jobs\DeleteClientOnDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncCustomerToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\SyncInvoiceToDaftraJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\UpdateClientOnDaftraJob;
+use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
 
 class BagistoDaftraSyncServiceProvider extends ServiceProvider
 {
@@ -49,6 +51,17 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
         // edits (/customer/account/profile/edit) — both fire the same event.
         Event::listen('customer.update.after', function ($customer) {
             UpdateClientOnDaftraJob::dispatch($customer);
+        });
+
+        // Listen BEFORE the customer is deleted so we can still read the
+        // daftra_client_id from the mapping table (it still exists at this point).
+        // The job then cleans up the local mapping AND removes the client on Daftra.
+        Event::listen('customer.delete.before', function ($customer) {
+            $mapping = DaftraClientMapping::where('customer_id', $customer->id)->first();
+
+            if ($mapping) {
+                DeleteClientOnDaftraJob::dispatch($customer->id, $mapping->daftra_client_id);
+            }
         });
 
         // Dispatch a background job when a Bagisto invoice is saved.
