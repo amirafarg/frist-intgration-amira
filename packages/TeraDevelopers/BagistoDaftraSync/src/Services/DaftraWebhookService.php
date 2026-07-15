@@ -4,6 +4,7 @@ namespace TeraDevelopers\BagistoDaftraSync\Services;
 
 use Illuminate\Support\Facades\Log;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
+use Webkul\Customer\Models\Customer;
 
 class DaftraWebhookService
 {
@@ -53,5 +54,76 @@ class DaftraWebhookService
         ]);
 
         return $daftraClientId;
+    }
+
+    /**
+     * Handle an inbound Daftra "client.deleted" webhook.
+     *
+     * Case A — customer_id IS NULL (webhook-originated mapping, no linked Bagisto customer)
+     *   Delete the mapping row. Nothing else.
+     *
+     * Case B — customer_id IS NOT NULL (real linked Bagisto customer)
+     *   Step 1: Delete the mapping row FIRST.
+     *           The Customer::deleting observer in BagistoDaftraSyncServiceProvider looks up
+     *           a mapping by customer_id and dispatches DeleteClientOnDaftraJob if it finds one.
+     *           Deleting the mapping first means the observer finds nothing → no job is
+     *           dispatched → no redundant DELETE call to a Daftra client that is already gone.
+     *   Step 2: Delete the Bagisto customer.
+     *
+     * The method is idempotent — if no mapping exists for the given daftra_client_id,
+     * it logs and returns without error (safe for re-delivered webhooks).
+     *
+     * @param  array<string, mixed>  $payload  Validated Daftra webhook payload
+     */
+    public function handleClientDeleted(array $payload): void
+    {
+        $daftraClientId = (int) $payload['id'];
+
+        $mapping = DaftraClientMapping::where('daftra_client_id', $daftraClientId)->first();
+
+        if (! $mapping) {
+            Log::info('[DaftraSync] client.deleted webhook — no mapping found, nothing to do.', [
+                'daftra_client_id' => $daftraClientId,
+            ]);
+
+            return;
+        }
+
+        // Case A — webhook-originated row, no Bagisto customer attached.
+        if ($mapping->customer_id === null) {
+            $mapping->delete();
+
+            Log::info('[DaftraSync] client.deleted webhook — mapping removed (no linked customer).', [
+                'daftra_client_id' => $daftraClientId,
+                'mapping_id' => $mapping->id,
+            ]);
+
+            return;
+        }
+
+        // Case B — real linked Bagisto customer.
+        $customerId = $mapping->customer_id;
+
+        // Delete the mapping first so the Customer::deleting observer finds no mapping
+        // and does not dispatch a DeleteClientOnDaftraJob for an already-gone Daftra client.
+        $mapping->delete();
+
+        $customer = Customer::find($customerId);
+
+        if (! $customer) {
+            Log::info('[DaftraSync] client.deleted webhook — mapping removed, Bagisto customer already gone.', [
+                'daftra_client_id' => $daftraClientId,
+                'customer_id' => $customerId,
+            ]);
+
+            return;
+        }
+
+        $customer->delete();
+
+        Log::info('[DaftraSync] client.deleted webhook — mapping removed and Bagisto customer deleted.', [
+            'daftra_client_id' => $daftraClientId,
+            'customer_id' => $customerId,
+        ]);
     }
 }

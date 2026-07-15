@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use TeraDevelopers\BagistoDaftraSync\Jobs\HandleDaftraClientCreatedJob;
+use TeraDevelopers\BagistoDaftraSync\Jobs\HandleDaftraClientDeletedJob;
 
 class DaftraController extends Controller
 {
@@ -63,14 +64,29 @@ class DaftraController extends Controller
     /**
      * POST /api/webhooks/daftra/client-deleted
      *
-     * Placeholder — not implemented in this phase.
+     * Handling strategy
+     * ─────────────────────────────────────────────────────────────────────────
+     *  Case A — mapping has customer_id = NULL (webhook-originated, no linked Bagisto customer):
+     *    Delete the mapping row only. Nothing else.
+     *
+     *  Case B — mapping has customer_id set (real linked Bagisto customer):
+     *    1. Delete the mapping row first (neutralises the Customer::deleting observer
+     *       so it does not dispatch a DeleteClientOnDaftraJob for an already-gone client).
+     *    2. Delete the Bagisto customer.
+     * ─────────────────────────────────────────────────────────────────────────
      */
     public function clientDeleted(Request $request): JsonResponse
     {
-        Log::info('[DaftraSync] client.deleted webhook received (not yet implemented).', [
-            'payload' => $request->all(),
+        $payload = $request->validate([
+            'id' => ['required', 'integer'],
         ]);
 
-        return response()->json(['status' => 'not_implemented'], 501);
+        Log::info('[DaftraSync] client.deleted webhook received.', [
+            'daftra_client_id' => $payload['id'],
+        ]);
+
+        HandleDaftraClientDeletedJob::dispatch($payload);
+
+        return response()->json(['status' => 'queued'], 202);
     }
 }
