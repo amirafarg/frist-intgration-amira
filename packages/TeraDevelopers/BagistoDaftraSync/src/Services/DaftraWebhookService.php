@@ -126,4 +126,101 @@ class DaftraWebhookService
             'customer_id' => $customerId,
         ]);
     }
+
+    /**
+     * Handle an inbound Daftra "client.updated" webhook.
+     *
+     * Always: update the reference columns in daftra_client_mappings.
+     *
+     * Case A — customer_id IS NULL (webhook-originated, no linked Bagisto customer):
+     *   Update the mapping row only. Nothing else.
+     *
+     * Case B — customer_id IS NOT NULL (real linked Bagisto customer):
+     *   Additionally overwrite the Bagisto Customer's first_name / last_name / email / phone,
+     *   but ONLY for fields where the Daftra payload value is non-empty (filled()).
+     *   Empty strings from Daftra (e.g. phone1: "") are treated as "don't touch" — they
+     *   do not overwrite whatever Bagisto has on record.
+     *
+     * Loop prevention (Case B):
+     *   The update is applied via $customer->save() directly on the Eloquent model.
+     *   Bagisto's customer.update.after custom event is fired by Bagisto's own
+     *   controller/repository flow — it does NOT fire from a plain Eloquent save().
+     *   Therefore UpdateClientOnDaftraJob is never dispatched, no outbound Daftra API
+     *   call is made, and no client.updated webhook is triggered in return.
+     *
+     * Idempotent — re-delivery of the same webhook produces the same state.
+     *
+     * @param  array<string, mixed>  $payload  Validated Daftra webhook payload
+     */
+    public function handleClientUpdated(array $payload): void
+    {
+        $daftraClientId = (int) $payload['id'];
+
+        $mapping = DaftraClientMapping::where('daftra_client_id', $daftraClientId)->first();
+
+        if (! $mapping) {
+            Log::info('[DaftraSync] client.updated webhook — no mapping found, nothing to do.', [
+                'daftra_client_id' => $daftraClientId,
+            ]);
+
+            return;
+        }
+
+        // Update reference columns on the mapping row.
+        // Normalize empty strings to null so "" doesn't land in the DB.
+        $mapping->update([
+            'business_name' => $payload['business_name'] ?: null,
+            'email' => $payload['email'] ?: null,
+            'phone1' => $payload['phone1'] ?: null,
+        ]);
+
+        // Case A — no linked Bagisto customer, done.
+        if ($mapping->customer_id === null) {
+            Log::info('[DaftraSync] client.updated webhook — mapping updated (no linked customer).', [
+                'daftra_client_id' => $daftraClientId,
+                'mapping_id' => $mapping->id,
+            ]);
+
+            return;
+        }
+
+        // Case B — real linked Bagisto customer.
+        $customer = Customer::find($mapping->customer_id);
+
+        if (! $customer) {
+            Log::info('[DaftraSync] client.updated webhook — mapping updated, Bagisto customer already gone.', [
+                'daftra_client_id' => $daftraClientId,
+                'customer_id' => $mapping->customer_id,
+            ]);
+
+            return;
+        }
+
+        // Apply each field only if the payload value is non-empty.
+        // filled() returns false for both null and "".
+        if (filled($payload['first_name'] ?? null)) {
+            $customer->first_name = $payload['first_name'];
+        }
+
+        if (filled($payload['last_name'] ?? null)) {
+            $customer->last_name = $payload['last_name'];
+        }
+
+        if (filled($payload['email'] ?? null)) {
+            $customer->email = $payload['email'];
+        }
+
+        if (filled($payload['phone1'] ?? null)) {
+            $customer->phone = $payload['phone1'];
+        }
+
+        // Direct Eloquent save — does NOT fire Bagisto's customer.update.after custom event.
+        // UpdateClientOnDaftraJob is therefore never dispatched. No loop.
+        $customer->save();
+
+        Log::info('[DaftraSync] client.updated webhook — mapping and Bagisto customer updated.', [
+            'daftra_client_id' => $daftraClientId,
+            'customer_id' => $customer->id,
+        ]);
+    }
 }

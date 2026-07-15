@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use TeraDevelopers\BagistoDaftraSync\Jobs\HandleDaftraClientCreatedJob;
 use TeraDevelopers\BagistoDaftraSync\Jobs\HandleDaftraClientDeletedJob;
+use TeraDevelopers\BagistoDaftraSync\Jobs\HandleDaftraClientUpdatedJob;
 
 class DaftraController extends Controller
 {
@@ -50,15 +51,35 @@ class DaftraController extends Controller
     /**
      * POST /api/webhooks/daftra/client-updated
      *
-     * Placeholder — not implemented in this phase.
+     * Handling strategy
+     * ─────────────────────────────────────────────────────────────────────────
+     *  Case A — mapping has customer_id = NULL (webhook-originated):
+     *    Update mapping reference columns (business_name, email, phone1) only.
+     *
+     *  Case B — mapping has customer_id set (real linked Bagisto customer):
+     *    Update mapping reference columns AND overwrite Bagisto Customer fields,
+     *    applying only non-empty values (empty string = don't touch).
+     *    Uses direct Eloquent save() — customer.update.after does NOT fire — no loop.
+     * ─────────────────────────────────────────────────────────────────────────
      */
     public function clientUpdated(Request $request): JsonResponse
     {
-        Log::info('[DaftraSync] client.updated webhook received (not yet implemented).', [
-            'payload' => $request->all(),
+        $payload = $request->validate([
+            'id' => ['required', 'integer'],
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
+            'business_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'max:255'],
+            'phone1' => ['nullable', 'string', 'max:50'],
         ]);
 
-        return response()->json(['status' => 'not_implemented'], 501);
+        Log::info('[DaftraSync] client.updated webhook received.', [
+            'daftra_client_id' => $payload['id'],
+        ]);
+
+        HandleDaftraClientUpdatedJob::dispatch($payload);
+
+        return response()->json(['status' => 'queued'], 202);
     }
 
     /**
