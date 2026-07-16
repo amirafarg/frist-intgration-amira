@@ -94,5 +94,10 @@ return [
     TaxServiceProvider::class,
     ThemeServiceProvider::class,
     UserServiceProvider::class,
+
+    /**
+     * TeraDevelopers service providers.
+     * Daftra Integration service providers.
+     */
     BagistoDaftraSyncServiceProvider::class,
 ];
