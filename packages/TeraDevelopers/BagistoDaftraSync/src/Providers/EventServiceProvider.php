@@ -13,12 +13,13 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // 1. Customer Events
+        // 1. Customer Events -> registration
         Event::listen(
             'customer.registration.after',
             'TeraDevelopers\BagistoDaftraSync\Listeners\Customer@onRegistrationAfter'
         );
 
+        // 1. Customer Events -> update
         Event::listen(
             'customer.update.after',
             'TeraDevelopers\BagistoDaftraSync\Listeners\Customer@onUpdateAfter'
@@ -29,12 +30,13 @@ class EventServiceProvider extends ServiceProvider
             app('TeraDevelopers\BagistoDaftraSync\Listeners\Customer')->onDeleting($customer);
         });
 
-        // 2. Sales Events
+        // 2. Sales Events -> invoice
         Event::listen(
             'sales.invoice.save.after',
             'TeraDevelopers\BagistoDaftraSync\Listeners\Sales@onInvoiceSaveAfter'
         );
 
+        // 2. Sales Events -> refund
         Event::listen(
             'sales.refund.save.after',
             'TeraDevelopers\BagistoDaftraSync\Listeners\Sales@onRefundSaveAfter'
