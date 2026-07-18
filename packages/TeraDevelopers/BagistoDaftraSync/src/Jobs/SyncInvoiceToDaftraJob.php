@@ -44,7 +44,7 @@ class SyncInvoiceToDaftraJob implements ShouldQueue
         if (! $order || ! $order->customer_id) {
             Log::info('[DaftraSync] Skipping guest-order invoice — no customer account.', [
                 'invoice_id' => $invoice->id,
-                'order_id'   => $invoice->order_id,
+                'order_id' => $invoice->order_id,
             ]);
 
             return;
@@ -64,6 +64,11 @@ class SyncInvoiceToDaftraJob implements ShouldQueue
             'invoice_id' => $invoice->id,
             'daftra_client_id' => $daftraClientId,
         ]);
+
+        // Step 3 — If invoice is paid, sync a client payment to apply to it.
+        if ($invoice->state === 'paid') {
+            SyncClientPaymentToDaftraJob::dispatch($invoice, $daftraClientId);
+        }
     }
 
     /**
