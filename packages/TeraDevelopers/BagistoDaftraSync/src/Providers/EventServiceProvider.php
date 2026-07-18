@@ -4,6 +4,7 @@ namespace TeraDevelopers\BagistoDaftraSync\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Webkul\Category\Models\Category;
 use Webkul\Customer\Models\Customer;
 
 class EventServiceProvider extends ServiceProvider
@@ -41,5 +42,22 @@ class EventServiceProvider extends ServiceProvider
             'sales.refund.save.after',
             'TeraDevelopers\BagistoDaftraSync\Listeners\Sales@onRefundSaveAfter'
         );
+
+        // 3. Category Events -> create
+        Event::listen(
+            'catalog.category.create.after',
+            'TeraDevelopers\BagistoDaftraSync\Listeners\Category@onCategoryCreateAfter'
+        );
+
+        // 3. Category Events -> update
+        Event::listen(
+            'catalog.category.update.after',
+            'TeraDevelopers\BagistoDaftraSync\Listeners\Category@onCategoryUpdateAfter'
+        );
+
+        // Eloquent Model Event for category deletion
+        Category::deleting(function ($category) {
+            app('TeraDevelopers\BagistoDaftraSync\Listeners\Category')->onDeleting($category);
+        });
     }
 }
