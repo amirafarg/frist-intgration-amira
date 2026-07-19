@@ -3,6 +3,7 @@
 namespace TeraDevelopers\BagistoDaftraSync\Services;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
 use Webkul\Customer\Models\Customer;
@@ -14,10 +15,10 @@ class DaftraWebhookService
      *
      * Scope & design intent
      * ─────────────────────────────────────────────────────────────────────────
-     * This method records that a Daftra client exists and creates a Bagisto 
+     * This method records that a Daftra client exists and creates a Bagisto
      * Customer record linked to it.
      *
-     *  • By using direct Eloquent creation ($customer->save()), no Bagisto 
+     *  • By using direct Eloquent creation ($customer->save()), no Bagisto
      *    model event (like customer.create.after) fires.
      *  • No outbound Daftra API call is made, so there is zero risk of
      *    triggering an outbound sync loop.
@@ -41,23 +42,24 @@ class DaftraWebhookService
                 'daftra_client_id' => $daftraClientId,
                 'customer_id' => $mapping->customer_id,
             ]);
+
             return $daftraClientId;
         }
 
         // We need to create a Bagisto Customer.
-        $customer = new Customer();
+        $customer = new Customer;
         $customer->first_name = $payload['first_name'] ?? ($payload['business_name'] ?? 'Unknown');
         $customer->last_name = $payload['last_name'] ?? 'Unknown';
-        
+
         // Bagisto requires an email. Use placeholder if not provided by Daftra.
         $customer->email = $payload['email'] ?? "daftra_{$daftraClientId}@placeholder.local";
-        
+
         $customer->phone = $payload['phone1'] ?? null;
         $customer->customer_group_id = 2; // Default 'General' group in Bagisto
         $customer->status = 1; // Active
         $customer->is_verified = 1;
         $customer->password = bcrypt(Str::random(16));
-        
+
         $customer->save(); // Direct eloquent save prevents Bagisto custom events from firing
 
         $mapping = DaftraClientMapping::updateOrCreate(
@@ -75,6 +77,20 @@ class DaftraWebhookService
             'mapping_id' => $mapping->id,
             'customer_id' => $customer->id,
         ]);
+
+        // Publish a real-time event to Redis so the Node.js WebSocket server
+        // can instantly broadcast it to connected admin browsers.
+        // This is a fire-and-forget non-blocking publish; the job does not
+        // depend on the realtime server being alive.
+        Redis::publish('daftra.customer.created', json_encode([
+            'customer_id' => $customer->id,
+            'first_name' => $customer->first_name,
+            'last_name' => $customer->last_name,
+            'email' => $customer->email,
+            'daftra_id' => $daftraClientId,
+            'business_name' => $payload['business_name'] ?? null,
+            'created_at' => now()->toIso8601String(),
+        ]));
 
         return $daftraClientId;
     }
