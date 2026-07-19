@@ -22,12 +22,11 @@ class RefundSyncService
         $apiKey = config('daftra.api_key');
         $url = "https://{$subdomain}.daftra.com/api2/refund_receipts";
 
-
         // 1. Get source Daftra invoice ID (`subscription_id`) dynamically from Daftra API (no new migration needed)
         $sourceInvoiceId = $this->getSourceInvoiceIdFromDaftra($refund, $daftraClientId, $subdomain, $apiKey);
 
         // 2. Map line items with exact same pattern as InvoiceSyncService
-        $lineItems = $refund->items->map(fn($item) => [
+        $lineItems = $refund->items->map(fn ($item) => [
             'item' => $item->name,
             'description' => $item->order_item->description ?? $item->sku,
             'quantity' => $item->qty,
@@ -40,9 +39,9 @@ class RefundSyncService
             'Invoice' => [
                 'subscription_id' => $sourceInvoiceId,
                 'client_id' => $daftraClientId,
-                'no' => 'RR-' . ($refund->increment_id ?? $refund->id),
+                'no' => 'RR-'.($refund->increment_id ?? $refund->id),
                 'date' => $refund->created_at->format('Y-m-d'),
-                'notes' => 'Refund #' . $refund->id . ' for Bagisto order #' . ($refund->order->increment_id ?? $refund->order_id),
+                'notes' => 'Refund #'.$refund->id.' for Bagisto order #'.($refund->order->increment_id ?? $refund->order_id),
                 'shipping_amount' => round((float) $refund->shipping_amount, 4),
                 'discount_amount' => round((float) $refund->discount_amount, 4),
             ],
@@ -55,10 +54,9 @@ class RefundSyncService
         ]);
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->post($url, $payload);
-
 
         // Daftra returns 202 Accepted on successful creation.
         if ($response->status() === 202) {
@@ -89,7 +87,7 @@ class RefundSyncService
         $url = "https://{$subdomain}.daftra.com/api2/invoices.json";
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->get($url, [
             'client_id' => $daftraClientId,
@@ -104,8 +102,8 @@ class RefundSyncService
             $invoices = $response->json('data') ?? [];
 
             $orderNo = (string) ($refund->order->increment_id ?? $refund->order_id);
-            $orderInvoiceNos = $refund->order->invoices->pluck('increment_id')->filter()->map(fn($val) => (string) $val)->toArray();
-            $orderInvoiceIds = $refund->order->invoices->pluck('id')->filter()->map(fn($val) => (string) $val)->toArray();
+            $orderInvoiceNos = $refund->order->invoices->pluck('increment_id')->filter()->map(fn ($val) => (string) $val)->toArray();
+            $orderInvoiceIds = $refund->order->invoices->pluck('id')->filter()->map(fn ($val) => (string) $val)->toArray();
 
             foreach ($invoices as $inv) {
                 $daftraInvNo = (string) ($inv['Invoice']['no'] ?? '');

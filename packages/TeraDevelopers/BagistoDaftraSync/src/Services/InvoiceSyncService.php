@@ -24,7 +24,7 @@ class InvoiceSyncService
         $apiKey = config('daftra.api_key');
         $url = "https://{$subdomain}.daftra.com/api2/invoices";
 
-        $lineItems = $invoice->items->map(fn($item) => [
+        $lineItems = $invoice->items->map(fn ($item) => [
             'item' => $item->name,
             'description' => $item->description ?? $item->sku,
             'quantity' => $item->qty,
@@ -38,7 +38,7 @@ class InvoiceSyncService
                 'client_id' => $daftraClientId,
                 'no' => $invoice->increment_id ?? (string) $invoice->id,
                 'date' => $invoice->created_at->format('Y-m-d'),
-                'notes' => 'Synced from Bagisto order #' . ($invoice->order->increment_id ?? $invoice->order_id),
+                'notes' => 'Synced from Bagisto order #'.($invoice->order->increment_id ?? $invoice->order_id),
                 'shipping_amount' => round((float) $invoice->shipping_amount, 4),
                 'discount_amount' => round((float) $invoice->discount_amount, 4),
             ],
@@ -46,7 +46,7 @@ class InvoiceSyncService
         ];
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->post($url, $payload);
 
