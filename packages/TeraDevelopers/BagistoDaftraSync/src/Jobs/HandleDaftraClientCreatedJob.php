@@ -27,12 +27,12 @@ class HandleDaftraClientCreatedJob implements ShouldQueue
     public array $backoff = [30, 120, 300];
 
     /**
-     * No Bagisto Customer is created or modified by this job.
+     * This job invokes the DaftraWebhookService which creates a new 
+     * Bagisto Customer and links it to the incoming Daftra client ID.
      * No outbound Daftra API call is made.
-     * No Bagisto events are fired.
-     *
-     * The only side effect is an upsert into daftra_client_mappings with
-     * customer_id = NULL — deliberately, as per the test-integration scope.
+     * 
+     * By using direct Eloquent creation ($customer->save()), no Bagisto 
+     * custom events are fired, preventing a Bagisto→Daftra→Bagisto sync loop.
      *
      * @param  array<string, mixed>  $payload  Daftra webhook payload (already validated by the controller)
      */
