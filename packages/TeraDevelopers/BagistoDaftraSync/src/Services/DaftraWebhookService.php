@@ -3,7 +3,6 @@
 namespace TeraDevelopers\BagistoDaftraSync\Services;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
 use Webkul\Customer\Models\Customer;
@@ -87,23 +86,36 @@ class DaftraWebhookService
         // Publish a real-time event to Redis so the Node.js WebSocket server
         // can instantly broadcast it to connected admin browsers.
         //
-        // IMPORTANT: We call the raw underlying phpredis client directly to
-        // bypass Laravel's key prefix (config: 'bagisto_database_'). If we
-        // used Redis::publish() the channel would become
-        // 'bagisto_database_daftra.customer.created' — which is not what
-        // Node.js subscribes to. The raw client publishes on the bare name.
-        Redis::connection('default')->client()->publish(
-            'daftra.customer.created',
-            json_encode([
-                'customer_id' => $customer->id,
-                'first_name' => $customer->first_name,
-                'last_name' => $customer->last_name,
-                'email' => $customer->email,
-                'daftra_id' => $daftraClientId,
-                'business_name' => $payload['business_name'] ?? null,
-                'created_at' => now()->toIso8601String(),
-            ])
-        );
+        // We open a DEDICATED raw phpredis connection for the publish.
+        // Reason: phpredis cannot share one connection between normal Eloquent
+        // queue-worker commands and pub/sub publish calls — reusing the
+        // Laravel-managed connection blocks indefinitely. A fresh connect →
+        // publish → close is the correct pattern and is non-blocking.
+        try {
+            $pub = new \Redis;
+            $pub->connect(
+                config('database.redis.default.host', '127.0.0.1'),
+                (int) config('database.redis.default.port', 6379)
+            );
+            $pub->publish(
+                'daftra.customer.created',
+                json_encode([
+                    'customer_id' => $customer->id,
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'email' => $customer->email,
+                    'daftra_id' => $daftraClientId,
+                    'business_name' => $payload['business_name'] ?? null,
+                    'created_at' => now()->toIso8601String(),
+                ])
+            );
+            $pub->close();
+        } catch (\Throwable $e) {
+            // Never let a realtime failure crash the queue job.
+            Log::warning('[DaftraSync] Redis publish failed — realtime notification skipped.', [
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $daftraClientId;
     }
