@@ -47,14 +47,20 @@ class DaftraWebhookService
         }
 
         // We need to create a Bagisto Customer.
+        // Use ?: (falsy coalesce) to normalize empty strings from Daftra to null,
+        // preventing unique constraint violations on phone/email columns.
         $customer = new Customer;
-        $customer->first_name = $payload['first_name'] ?? ($payload['business_name'] ?? 'Unknown');
-        $customer->last_name = $payload['last_name'] ?? 'Unknown';
+        $customer->first_name = ($payload['first_name'] ?? null)
+            ?: ($payload['business_name'] ?? null)
+            ?: 'Unknown';
+        $customer->last_name = ($payload['last_name'] ?? null) ?: 'Unknown';
 
         // Bagisto requires an email. Use placeholder if not provided by Daftra.
-        $customer->email = $payload['email'] ?? "daftra_{$daftraClientId}@placeholder.local";
+        $customer->email = ($payload['email'] ?? null)
+            ?: "daftra_{$daftraClientId}@placeholder.local";
 
-        $customer->phone = $payload['phone1'] ?? null;
+        // Normalize empty string to null — phone has a UNIQUE index in Bagisto.
+        $customer->phone = ($payload['phone1'] ?? null) ?: null;
         $customer->customer_group_id = 2; // Default 'General' group in Bagisto
         $customer->status = 1; // Active
         $customer->is_verified = 1;
