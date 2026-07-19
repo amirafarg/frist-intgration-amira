@@ -34,6 +34,13 @@ class BagistoDaftraSyncServiceProvider extends ServiceProvider
             $viewRenderEventManager->addTemplate('bagistodaftrasync::admin.layouts.style');
         });
 
+        // Inject the Daftra real-time Socket.io client into every admin page.
+        // Uses the body.after render event so it loads after all Vue components
+        // are registered and does not touch any Bagisto core layout file.
+        Event::listen('bagisto.admin.layout.body.after', function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('bagistodaftrasync::admin.layouts.realtime-client');
+        });
+
         // Register package event listeners
         $this->app->register(EventServiceProvider::class);
     }
