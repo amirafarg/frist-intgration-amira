@@ -142,6 +142,12 @@
 
             mounted() {
                 this.boot();
+
+                if (window.emitter) {
+                    window.emitter.on('reload-datagrid', () => {
+                        this.get();
+                    });
+                }
             },
 
             methods: {

@@ -53,11 +53,10 @@
         // If the admin is currently viewing the Customers list, reload the
         // DataGrid so the new row appears without a manual refresh.
         const onCustomerList = window.location.pathname.includes('/customers');
-        if (onCustomerList) {
-            // Bagisto DataGrids are Vue components. Dispatching a custom event
-            // is the cleanest way to trigger a reload without coupling to
-            // internal Bagisto APIs.
-            setTimeout(() => window.location.reload(), 2500);
+        if (onCustomerList && window.emitter) {
+            // Fire the global event we added to the v-datagrid component
+            // This triggers the Vue component to fetch the new data in the background
+            setTimeout(() => window.emitter.emit('reload-datagrid'), 1000);
         }
     });
 
