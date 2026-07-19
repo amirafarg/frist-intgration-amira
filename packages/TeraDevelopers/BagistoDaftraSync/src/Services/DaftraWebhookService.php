@@ -3,6 +3,7 @@
 namespace TeraDevelopers\BagistoDaftraSync\Services;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use TeraDevelopers\BagistoDaftraSync\Models\DaftraClientMapping;
 use Webkul\Customer\Models\Customer;
 
@@ -13,15 +14,13 @@ class DaftraWebhookService
      *
      * Scope & design intent
      * ─────────────────────────────────────────────────────────────────────────
-     * This method records that a Daftra client exists without creating or
-     * touching any Bagisto Customer record.
+     * This method records that a Daftra client exists and creates a Bagisto 
+     * Customer record linked to it.
      *
-     *  • customer_id stays NULL — deliberate scope limit for the test
-     *    integration; linking an inbound Daftra client to a Bagisto Customer
-     *    is explicitly out of scope for the current phase.
-     *
+     *  • By using direct Eloquent creation ($customer->save()), no Bagisto 
+     *    model event (like customer.create.after) fires.
      *  • No outbound Daftra API call is made, so there is zero risk of
-     *    triggering the outbound sync loop (no Bagisto model event fires).
+     *    triggering an outbound sync loop.
      *
      *  • updateOrCreate is used (keyed on daftra_client_id) so the handler
      *    is idempotent — re-delivery of the same webhook is safe.
@@ -34,23 +33,47 @@ class DaftraWebhookService
     {
         $daftraClientId = (int) $payload['id'];
 
+        $mapping = DaftraClientMapping::where('daftra_client_id', $daftraClientId)->first();
+
+        // If mapping exists and already has a customer_id, do nothing.
+        if ($mapping && $mapping->customer_id !== null) {
+            Log::info('[DaftraSync] client.created webhook — mapping already linked to Bagisto customer.', [
+                'daftra_client_id' => $daftraClientId,
+                'customer_id' => $mapping->customer_id,
+            ]);
+            return $daftraClientId;
+        }
+
+        // We need to create a Bagisto Customer.
+        $customer = new Customer();
+        $customer->first_name = $payload['first_name'] ?? ($payload['business_name'] ?? 'Unknown');
+        $customer->last_name = $payload['last_name'] ?? 'Unknown';
+        
+        // Bagisto requires an email. Use placeholder if not provided by Daftra.
+        $customer->email = $payload['email'] ?? "daftra_{$daftraClientId}@placeholder.local";
+        
+        $customer->phone = $payload['phone1'] ?? null;
+        $customer->customer_group_id = 2; // Default 'General' group in Bagisto
+        $customer->status = 1; // Active
+        $customer->is_verified = 1;
+        $customer->password = bcrypt(Str::random(16));
+        
+        $customer->save(); // Direct eloquent save prevents Bagisto custom events from firing
+
         $mapping = DaftraClientMapping::updateOrCreate(
-            // Search key — daftra_client_id must be unique in the table.
             ['daftra_client_id' => $daftraClientId],
-            // Reference columns populated from the webhook payload.
-            // customer_id is intentionally omitted — it stays NULL.
             [
+                'customer_id' => $customer->id,
                 'business_name' => $payload['business_name'] ?? null,
                 'email' => $payload['email'] ?? null,
                 'phone1' => $payload['phone1'] ?? null,
             ]
         );
 
-        Log::info('[DaftraSync] daftra_client_mappings upserted from webhook.', [
+        Log::info('[DaftraSync] daftra_client_mappings upserted from webhook, Bagisto customer created.', [
             'daftra_client_id' => $daftraClientId,
             'mapping_id' => $mapping->id,
-            'was_created' => $mapping->wasRecentlyCreated,
-            'business_name' => $payload['business_name'] ?? null,
+            'customer_id' => $customer->id,
         ]);
 
         return $daftraClientId;

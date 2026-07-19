@@ -20,19 +20,21 @@ class DaftraController extends Controller
      *
      * Handling strategy
      * ─────────────────────────────────────────────────────────────────────────
-     *  1. Validate the minimum required fields from the payload.
+     *  1. Validate the required fields from the payload.
      *  2. Dispatch HandleDaftraClientCreatedJob to the queue — the HTTP
      *     response is returned immediately; no blocking work is done here.
-     *  3. The job upserts a row into daftra_client_mappings with
-     *     customer_id = NULL (no Bagisto Customer is created or modified).
-     *  4. No Bagisto model events fire → no outbound sync is triggered →
-     *     zero risk of a Bagisto→Daftra→Bagisto loop.
+     *  3. The job creates a Bagisto Customer via direct Eloquent and 
+     *     upserts a row into daftra_client_mappings linking the two.
+     *  4. By using direct Eloquent save(), Bagisto model events do not fire
+     *     → no outbound sync is triggered → zero risk of a loop.
      * ─────────────────────────────────────────────────────────────────────────
      */
     public function clientCreated(Request $request): JsonResponse
     {
         $payload = $request->validate([
             'id' => ['required', 'integer'],
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
             'business_name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone1' => ['nullable', 'string', 'max:50'],
