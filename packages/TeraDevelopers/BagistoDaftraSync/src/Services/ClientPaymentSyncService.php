@@ -23,7 +23,7 @@ class ClientPaymentSyncService
         $paymentMethod = $bagistoPaymentMethod === 'cashondelivery' ? 'cash' : 'bank';
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->post($url, [
             'ClientPayment' => [

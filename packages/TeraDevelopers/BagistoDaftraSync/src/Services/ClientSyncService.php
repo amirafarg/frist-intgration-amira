@@ -30,7 +30,7 @@ class ClientSyncService
         $url = "https://{$subdomain}.daftra.com/api2/clients";
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->post($url, [
             'Client' => [
@@ -100,7 +100,7 @@ class ClientSyncService
         $url = "https://{$subdomain}.daftra.com/api2/clients/{$mapping->daftra_client_id}.json";
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->put($url, [
             'Client' => [
@@ -147,7 +147,7 @@ class ClientSyncService
         $url = "https://{$subdomain}.daftra.com/api2/clients/{$daftraClientId}.json";
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->delete($url);
 

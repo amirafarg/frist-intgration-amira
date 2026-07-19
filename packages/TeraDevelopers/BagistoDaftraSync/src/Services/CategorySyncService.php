@@ -38,11 +38,11 @@ class CategorySyncService
         }
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->post($url, [
             'Category' => [
-                'name' => $category->name ?: 'Category ' . $category->id,
+                'name' => $category->name ?: 'Category '.$category->id,
                 'category_type' => 1, // Product Category
                 'parent_id' => $parentId,
                 'description' => $category->description ?? '',
@@ -116,11 +116,11 @@ class CategorySyncService
         }
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->put($url, [
             'Category' => [
-                'name' => $category->name ?: 'Category ' . $category->id,
+                'name' => $category->name ?: 'Category '.$category->id,
                 'category_type' => 1,
                 'parent_id' => $parentId,
                 'description' => $category->description ?? '',
@@ -156,7 +156,7 @@ class CategorySyncService
         $url = "https://{$subdomain}.daftra.com/api2/product_categories/1/{$daftraCategoryId}.json";
 
         $response = Http::withHeaders([
-            'APIKEY' => $apiKey,
+            'apikey' => $apiKey,
             'Accept' => 'application/json',
         ])->delete($url);
 

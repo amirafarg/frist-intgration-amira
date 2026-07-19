@@ -59,5 +59,11 @@ class EventServiceProvider extends ServiceProvider
         Category::deleting(function ($category) {
             app('TeraDevelopers\BagistoDaftraSync\Listeners\Category')->onDeleting($category);
         });
+
+        // 4. Product Events -> update
+        Event::listen(
+            'catalog.product.update.after',
+            'TeraDevelopers\BagistoDaftraSync\Listeners\Product@onUpdateAfter'
+        );
     }
 }
