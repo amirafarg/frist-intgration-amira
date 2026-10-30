@@ -2,6 +2,7 @@
     'name'     => '',
     'value'    => 1,
     'minValue' => 1,
+    'maxValue' => 100,
 ])
 
 <v-quantity-changer
@@ -9,6 +10,7 @@
     name="{{ $name }}"
     value="{{ $value }}"
     min-value="{{ $minValue }}"
+    max-value="{{ $maxValue }}"
 >
 </v-quantity-changer>
 
@@ -52,23 +54,27 @@
         app.component("v-quantity-changer", {
             template: '#v-quantity-changer-template',
 
-            props:['name', 'value', 'minValue'],
+            props:['name', 'value', 'minValue', 'maxValue'],
 
             data() {
                 return  {
-                    quantity: this.value,
+                    quantity: Math.min(Number(this.value) || 1, Number(this.maxValue) || 100),
                 }
             },
 
             watch: {
                 value() {
-                    this.quantity = this.value;
+                    this.quantity = Math.min(Number(this.value) || 1, Number(this.maxValue) || 100);
                 },
             },
 
             methods: {
                 increase() {
-                    this.$emit('change', ++this.quantity);
+                    if (Number(this.quantity) < Number(this.maxValue)) {
+                        this.quantity = Number(this.quantity) + 1;
+
+                        this.$emit('change', this.quantity);
+                    }
                 },
 
                 decrease() {

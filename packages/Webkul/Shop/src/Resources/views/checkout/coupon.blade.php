@@ -1,6 +1,7 @@
 <!-- Coupon Vue Component -->
 <v-coupon 
     :cart="cart"
+    :show-inline-form="@json($showInlineForm ?? false)"
     @coupon-applied="getCart"
     @coupon-removed="getCart"
 >
@@ -11,14 +12,51 @@
         type="text/x-template"
         id="v-coupon-template"
     >
-        <div class="flex justify-between text-right">
-            <p class="text-base max-md:font-normal max-sm:text-sm">
+        <div :class="showInlineForm ? 'cart-coupon-inline' : 'flex justify-between text-right'">
+            <p class="text-base max-md:font-normal max-sm:text-sm" v-if="! showInlineForm">
                 @{{ cart.coupon_code ? "@lang('shop::app.checkout.coupon.applied')" : "@lang('shop::app.checkout.coupon.discount')" }}
             </p>
 
             {!! view_render_event('bagisto.shop.checkout.cart.coupon.before') !!}
 
-            <p class="text-base font-medium max-sm:text-sm">
+            <div class="cart-coupon-form" v-if="showInlineForm">
+                <template v-if="! cart.coupon_code">
+                    <input
+                        type="text"
+                        name="code"
+                        v-model="couponCode"
+                        class="min-w-0 flex-1 border border-zinc-300 px-5 py-3 outline-none max-sm:px-3"
+                        placeholder="Apply coupon code"
+                        aria-label="@lang('shop::app.checkout.coupon.enter-your-code')"
+                    >
+
+                    <button
+                        type="button"
+                        class="primary-button cart-coupon-apply"
+                        :disabled="isStoring || ! couponCode.trim()"
+                        @click="applyCoupon({ code: couponCode }, { resetForm: () => couponCode = '' })"
+                    >
+                        @lang('shop::app.checkout.coupon.button-title')
+                    </button>
+                </template>
+
+                <span
+                    v-else
+                    class="inline-flex items-center gap-2"
+                >
+                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                        @{{ cart.coupon_code }}
+                    </span>
+
+                    <span
+                        class="icon-cancel cursor-pointer text-xl text-gray-400 hover:text-red-500"
+                        title="@lang('shop::app.checkout.coupon.remove')"
+                        @click="destroyCoupon"
+                    ></span>
+                </span>
+            </div>
+
+            <p class="text-base font-medium max-sm:text-sm" v-else>
                 <!-- Apply Coupon Form -->
                 <x-shop::form
                     v-slot="{ meta, errors, handleSubmit }"
@@ -124,11 +162,18 @@
         app.component('v-coupon', {
             template: '#v-coupon-template',
             
-            props: ['cart'],
+            props: {
+                cart: Object,
+                showInlineForm: {
+                    type: Boolean,
+                    default: false,
+                },
+            },
 
             data() {
                 return {
                     isStoring: false,
+                    couponCode: '',
                 }
             },
 
@@ -144,16 +189,20 @@
                   
                             this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 
-                            this.$refs.couponModel.toggle();
+                            if (! this.showInlineForm) {
+                                this.$refs.couponModel.toggle();
+                            }
 
                             resetForm();
                         })
                         .catch((error) => {
                             this.isStoring = false;
 
-                            this.$refs.couponModel.toggle();
+                            if (! this.showInlineForm) {
+                                this.$refs.couponModel.toggle();
+                            }
 
-                            if ([400, 422].includes(error.response.request.status)) {
+                            if ([400, 422].includes(error.response?.status || error.response?.request?.status)) {
                                 this.$emitter.emit('add-flash', { type: 'warning', message: error.response.data.message });
 
                                 resetForm();

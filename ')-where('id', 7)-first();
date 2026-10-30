@@ -1,0 +1,17 @@
+[90m= [39m[34;4mIlluminate\Support\Collection[39;24m {#10184
+    [34mall[39m: [
+      {#10179
+        +"[1mid[22m": [35m7[39m,
+        +"[1mcategory_id[22m": [35m7[39m,
+        +"[1mname[22m": [32m"[39m[32mPolo[39m[32m"[39m,
+        +"[1mslug[22m": [32m"[39m[32mpolo[39m[32m"[39m,
+        +"[1murl_path[22m": [32m""[39m,
+        +"[1mdescription[22m": [32m"[39m[32m<p>many polo with diffrant colors and sizes</p>[39m[32m"[39m,
+        +"[1mmeta_title[22m": [32m""[39m,
+        +"[1mmeta_description[22m": [32m""[39m,
+        +"[1mmeta_keywords[22m": [32m""[39m,
+        +"[1mlocale_id[22m": [35m1[39m,
+        +"[1mlocale[22m": [32m"[39m[32men[39m[32m"[39m,
+      },
+    ],
+  }

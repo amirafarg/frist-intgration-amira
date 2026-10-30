@@ -278,28 +278,29 @@ class CategoryRepository extends Repository
      */
     public function uploadImages($data, $category, $type = 'logo_path')
     {
-        if (isset($data[$type])) {
-            foreach ($data[$type] as $imageId => $image) {
-                $file = $type.'.'.$imageId;
+        foreach ((array) request()->file($type, []) as $uploadedFile) {
+            if (! $uploadedFile) {
+                continue;
+            }
 
-                if (request()->hasFile($file)) {
-                    if ($category->{$type}) {
-                        Storage::delete($category->{$type});
-                    }
+            $encoded = image_manager()->read($uploadedFile)->encodeByExtension('webp');
 
-                    $encoded = image_manager()->read(request()->file($file))->encodeByExtension('webp');
+            $oldPath = $category->{$type};
+            $newPath = 'category/'.$category->id.'/'.Str::random(40).'.webp';
 
-                    $category->{$type} = 'category/'.$category->id.'/'.Str::random(40).'.webp';
+            if (Storage::put($newPath, (string) $encoded)) {
+                $category->{$type} = $newPath;
 
-                    Storage::put($category->{$type}, (string) $encoded);
+                $category->save();
 
-                    $category->save();
+                if ($oldPath) {
+                    Storage::delete($oldPath);
                 }
             }
-        } else {
-            if ($category->{$type}) {
-                Storage::delete($category->{$type});
-            }
+        }
+
+        if (! empty($data[$type.'_removed']) && $category->{$type}) {
+            Storage::delete($category->{$type});
 
             $category->{$type} = null;
 

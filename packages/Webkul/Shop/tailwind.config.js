@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./src/Resources/**/*.blade.php", "./src/Resources/**/*.js"],
+    content: ["./src/Resources/**/*.blade.php", "./src/Resources/**/*.js", "./src/Resources/**/*.vue"],
 
     theme: {
         container: {
@@ -29,6 +29,10 @@ module.exports = {
 
         extend: {
             colors: {
+                grey: "rgb(75 85 99)",
+                darkBlack: "rgb(39 39 42)",
+                orange: "#AF8234",
+                black: "#000000",
                 navyBlue: "#060C3B",
                 lightOrange: "#F6F2EB",
                 darkGreen: '#40994A',

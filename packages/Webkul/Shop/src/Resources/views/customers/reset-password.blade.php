@@ -32,8 +32,8 @@
                 aria-label="@lang('shop::app.customers.reset-password.bagisto')"
             >
                 <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
+                    src="{{ bagisto_asset('images/logo.svg', 'shop') }}"
+                    alt="Keswa"
                     width="131"
                     height="29"
                 >
@@ -96,7 +96,6 @@
                             rules="required|min:6"
                             value=""
                             :label="trans('shop::app.customers.reset-password.password')"
-                            :placeholder="trans('shop::app.customers.reset-password.password')"
                             ref="password"
                             :aria-label="trans('shop::app.customers.reset-password.password')"
                             aria-required="true"
@@ -118,7 +117,6 @@
                             rules="confirmed:@password"
                             value=""
                             :label="trans('shop::app.customers.reset-password.confirm-password')"
-                            :placeholder="trans('shop::app.customers.reset-password.confirm-password')"
                             :aria-label="trans('shop::app.customers.reset-password.confirm-password')"
                             aria-required="true"
                         />

@@ -152,7 +152,6 @@
                                 name="password"
                                 class="px-6 py-4"
                                 rules="required"
-                                placeholder="Enter your password"
                             />
 
                             <x-shop::form.control-group.error

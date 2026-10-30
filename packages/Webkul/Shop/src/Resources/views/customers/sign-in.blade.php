@@ -5,6 +5,245 @@
     <meta name="keywords" content="@lang('shop::app.customers.login-form.page-title')"/>
 @endPush
 
+@push('styles')
+    <style>
+        .keswa-login {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 80px 28px 32px;
+            color: #000;
+        }
+
+        .keswa-login__logo {
+            position: relative;
+            width: 184px;
+            height: 58px;
+            margin: 0 auto 30px;
+            color: #242021;
+            font-family: Arial, sans-serif;
+        }
+
+        .keswa-login__logo-est {
+            position: absolute;
+            top: 0;
+            right: 14px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .keswa-login__logo-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-size: 53px;
+            font-weight: 800;
+            letter-spacing: -4px;
+            line-height: 0.85;
+        }
+
+        .keswa-login__logo-register {
+            position: absolute;
+            right: 0;
+            bottom: 1px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .keswa-login__card {
+            width: 100%;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+        }
+
+        .keswa-login__title {
+            color: #000;
+            font-family: Arial, sans-serif;
+            font-size: 30px;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .keswa-login__subtitle {
+            margin-top: 3px;
+            color: #64748b;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.35;
+        }
+
+        .keswa-login .control-input {
+            height: 59px;
+            border: 1px solid #dce1e8;
+            border-radius: 6px;
+            background: #fff !important;
+            padding: 0 23px;
+            color: #1f1f1f;
+            font-family: Arial, sans-serif;
+            font-size: 23px;
+        }
+
+        .keswa-login .control-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .keswa-login .control-input:-webkit-autofill,
+        .keswa-login .control-input:-webkit-autofill:hover,
+        .keswa-login .control-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #fff inset;
+            -webkit-text-fill-color: #1f1f1f;
+        }
+
+        .keswa-login .primary-button {
+            height: 53px;
+            border: 0;
+            border-radius: 2px;
+            background: #1f1f1f;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .keswa-login .primary-button:hover {
+            background: #000;
+        }
+
+        @media (min-width: 768px) {
+            .keswa-login {
+                max-width: 1280px;
+                padding: 32px 28px 32px;
+            }
+
+            .keswa-login__logo {
+                width: 184px;
+                margin: 0 auto 28px;
+            }
+
+            .keswa-login__card {
+                max-width: 1226px;
+                min-height: 692px;
+                margin: 0 auto;
+                border: 1px solid #dce1e8;
+                padding: 89px 127px 72px;
+            }
+
+            .keswa-login__title {
+                font-size: 42px;
+                line-height: 1;
+            }
+
+            .keswa-login__subtitle {
+                margin-top: 20px;
+                font-size: 23px;
+                line-height: 1.25;
+            }
+
+            .keswa-login .mt-12 {
+                margin-top: 76px;
+            }
+
+            .keswa-login .mb-4 {
+                margin-bottom: 31px;
+            }
+
+            .keswa-login .mb-4 > label {
+                font-size: 20px;
+                line-height: 1.25;
+            }
+
+            .keswa-login .control-input {
+                height: 68px;
+                padding: 0 26px;
+                font-size: 21px;
+            }
+
+            .keswa-login .control-input::placeholder {
+                font-size: 21px;
+            }
+
+            .keswa-login .primary-button {
+                width: 527px;
+                max-width: 100%;
+                height: 64px;
+                font-size: 21px;
+            }
+
+            .keswa-login .text-base,
+            .keswa-login .text-\[18px\] {
+                font-size: 19px;
+            }
+
+            .keswa-login > p {
+                margin-top: 47px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .keswa-login {
+                max-width: 100%;
+                padding: 32px 20px 24px;
+            }
+
+            .keswa-login__logo {
+                width: 152px;
+                height: 48px;
+                margin-bottom: 24px;
+            }
+
+            .keswa-login__logo-name {
+                font-size: 44px;
+            }
+
+            .keswa-login__title {
+                font-size: 24px;
+            }
+
+            .keswa-login__subtitle {
+                margin-top: 0;
+                font-size: 15px;
+            }
+
+            .keswa-login .mt-12 {
+                margin-top: 16px;
+            }
+
+            .keswa-login .mb-4 {
+                margin-bottom: 20px;
+            }
+
+            .keswa-login .control-input {
+                height: 54px;
+                padding: 0 15px;
+                font-size: 16px;
+            }
+
+            .keswa-login .control-input::placeholder {
+                font-size: 16px;
+            }
+
+            .keswa-login .primary-button {
+                width: 100% !important;
+                max-width: none;
+                height: 46px;
+                font-size: 18px;
+            }
+
+            .keswa-login__card > p {
+                margin-top: 24px;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            .keswa-login > p {
+                margin-top: 32px;
+                font-size: 12px;
+            }
+        }
+    </style>
+@endpush
+
 <x-shop::layouts
     :has-header="false"
     :has-feature="false"
@@ -15,40 +254,42 @@
         @lang('shop::app.customers.login-form.page-title')
     </x-slot>
 
-    <div class="container mt-20 max-1180:px-5 max-md:mt-12">
+    <div class="keswa-login">
         {!! view_render_event('bagisto.shop.customers.login.logo.before') !!}
 
         <!-- Company Logo -->
-        <div class="flex items-center gap-x-14 max-[1180px]:gap-x-9">
+        <div>
             <a
                 href="{{ route('shop.home.index') }}"
-                class="m-[0_auto_20px_auto]"
                 aria-label="@lang('shop::app.customers.login-form.bagisto')"
             >
-                <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
-                    width="131"
-                    height="29"
+                <div
+                    class="keswa-login__logo"
+                    role="img"
+                    aria-label="Keswa"
                 >
+                    <span class="keswa-login__logo-est">EST. 2012</span>
+                    <span class="keswa-login__logo-name">Keswa</span>
+                    <span class="keswa-login__logo-register">®</span>
+                </div>
             </a>
         </div>
 
         {!! view_render_event('bagisto.shop.customers.login.logo.after') !!}
 
         <!-- Form Container -->
-        <div class="m-auto w-full max-w-[870px] rounded-xl border border-zinc-200 p-16 px-[90px] max-md:px-8 max-md:py-8 max-sm:border-none max-sm:p-0">
-            <h1 class="font-dmserif text-4xl max-md:text-3xl max-sm:text-xl">
+        <div class="keswa-login__card">
+            <h1 class="keswa-login__title">
                 @lang('shop::app.customers.login-form.page-title')
             </h1>
 
-            <p class="mt-4 text-xl text-zinc-500 max-sm:mt-0 max-sm:text-sm">
+            <p class="keswa-login__subtitle">
                 @lang('shop::app.customers.login-form.form-login-text')
             </p>
 
             {!! view_render_event('bagisto.shop.customers.login.before') !!}
 
-            <div class="mt-14 rounded max-sm:mt-8">
+            <div class="mt-12">
                 <x-shop::form :action="route('shop.customer.session.create')">
 
                     {!! view_render_event('bagisto.shop.customers.login_form_controls.before') !!}
@@ -61,7 +302,7 @@
 
                         <x-shop::form.control-group.control
                             type="email"
-                            class="px-6 py-4 max-md:py-3 max-sm:py-2"
+                            class="control-input"
                             name="email"
                             rules="required|email"
                             value=""
@@ -82,13 +323,12 @@
 
                         <x-shop::form.control-group.control
                             type="password"
-                            class="px-6 py-4 max-md:py-3 max-sm:py-2"
+                            class="control-input"
                             id="password"
                             name="password"
                             rules="required|min:6"
                             value=""
                             :label="trans('shop::app.customers.login-form.password')"
-                            :placeholder="trans('shop::app.customers.login-form.password')"
                             :aria-label="trans('shop::app.customers.login-form.password')"
                             aria-required="true"
                         />
@@ -106,12 +346,14 @@
                             />
 
                             <label
-                                class="icon-uncheck peer-checked:icon-check-box cursor-pointer text-2xl text-navyBlue peer-checked:text-navyBlue max-sm:text-xl"
+                                class="icon-uncheck peer-checked:icon-check-box cursor-pointer text-2xl max-sm:text-xl"
+                                style="color: #1f1f1f;"
                                 for="show-password"
                             ></label>
 
                             <label
-                                class="cursor-pointer select-none text-base text-zinc-500 max-sm:text-sm ltr:pl-0 rtl:pr-0"
+                                class="cursor-pointer select-none text-base max-sm:text-sm ltr:pl-0 rtl:pr-0"
+                                style="color: #64748b;"
                                 for="show-password"
                             >
                                 @lang('shop::app.customers.login-form.show-password')
@@ -140,15 +382,14 @@
                     @endif
 
                     <!-- Submit Button -->
-                    <div class="mt-8 flex flex-wrap items-center gap-9 max-sm:justify-center max-sm:gap-5 max-sm:text-center">
+                    <div class="mt-12 flex flex-wrap items-center">
                         <button
-                            class="primary-button m-0 mx-auto block w-full max-w-[374px] rounded-2xl px-11 py-4 text-center text-base max-md:max-w-full max-md:rounded-lg max-md:py-3 max-sm:py-1.5 ltr:ml-0 rtl:mr-0"
+                            class="primary-button block w-full text-center"
                             type="submit"
                         >
                             @lang('shop::app.customers.login-form.button-title')
                         </button>
 
-                        {!! view_render_event('bagisto.shop.customers.login_form_controls.after') !!}
                     </div>
                 </x-shop::form>
             </div>
@@ -169,11 +410,11 @@
                 </p>
             @endif
 
-            <p class="mt-5 font-medium text-zinc-500 max-sm:text-center max-sm:text-sm">
+            <p class="mt-8 text-left text-[18px] text-slate-500">
                 @lang('shop::app.customers.login-form.new-customer')
 
                 <a
-                    class="text-navyBlue"
+                    class="text-black"
                     href="{{ route('shop.customers.register.index') }}"
                 >
                     @lang('shop::app.customers.login-form.create-your-account')
@@ -181,7 +422,7 @@
             </p>
         </div>
 
-        <p class="mb-4 mt-8 text-center text-xs text-zinc-500">
+        <p class="mt-12 text-center text-sm text-slate-500">
             @lang('shop::app.customers.login-form.footer', ['current_year'=> date('Y') ])
         </p>
     </div>

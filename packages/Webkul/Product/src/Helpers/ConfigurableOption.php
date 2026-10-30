@@ -48,7 +48,10 @@ class ConfigurableOption
             ->get();
 
         foreach ($variantCollection as $variant) {
-            if ($variant->isSaleable()) {
+            // Keep enabled variants in the option data even when their stock is
+            // currently zero.  Hiding them here also hides their attribute
+            // swatches (for example, a newly added color) from the storefront.
+            if ($variant->status) {
                 $this->allowedVariants[] = $variant;
             }
         }

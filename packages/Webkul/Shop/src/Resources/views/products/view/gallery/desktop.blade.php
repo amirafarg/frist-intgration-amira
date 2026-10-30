@@ -1,5 +1,5 @@
 <!-- For large screens greater than 1180px. -->
-<div class="sticky top-20 flex h-max gap-8 max-1180:hidden">
+<div class="sticky top-20 flex h-max gap-4 max-1180:hidden">
     <!-- Product Image and Videos Slider -->
     <div class="flex-24 h-509 flex min-w-[100px] max-w-[100px] flex-wrap place-content-start justify-center gap-2.5 overflow-y-auto overflow-x-hidden">
         <!-- Arrow Up -->
@@ -21,7 +21,7 @@
             <template v-for="(media, index) in [...media.images, ...media.videos]">
                 <video
                     v-if="media.type == 'videos'"
-                    :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-xl border ${isActiveMedia(index) ? 'pointer-events-none border-navyBlue' : 'border-white'}`"
+                    :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-md border ${isActiveMedia(index) ? 'pointer-events-none border-navyBlue' : 'border-white'}`"
                     @click="change(media, index)"
                     alt="{{ $product->name }}"
                     tabindex="0"
@@ -34,11 +34,11 @@
 
                 <img
                     v-else
-                    :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-xl border ${isActiveMedia(index) ? 'pointer-events-none border border-navyBlue' : 'border-white'}`"
+                    :class="`transparent max-h-[200px] min-w-[100px] cursor-pointer rounded-md border ${isActiveMedia(index) ? 'pointer-events-none border border-navyBlue' : 'border-white'}`"
                     :src="media.small_image_url"
                     alt="{{ $product->name }}"
                     width="100"
-                    height="100"
+                    height="200"
                     tabindex="0"
                     @click="change(media, index)"
                 />
@@ -59,23 +59,24 @@
 
     <!-- Product Base Image and Video with Shimmer-->
     <div
-        class="max-h-[610px] max-w-[560px]"
+        class="max-h-[700px] max-w-[500px]"
         v-show="isMediaLoading"
-    >
-        <div class="shimmer min-h-[607px] min-w-[560px] rounded-xl bg-zinc-200"></div>
+     >
+        <div class="shimmer min-h-[700px] min-w-[500px] bg-zinc-200"></div>
     </div>
 
     <div
-        class="max-h-[610px] max-w-[560px]"
+        class="max-h-[700px] max-w-[500px] overflow-hidden rounded-md"
         v-show="! isMediaLoading"
-    >
+        @mousemove="updateZoomOrigin($event)"
+        @mouseleave="resetZoomOrigin"
+     >
         <img
-            class="min-w-[450px] cursor-pointer rounded-xl"
+            class="block h-auto max-h-[700px] max-w-[500px] cursor-zoom-in rounded-md object-contain transition-transform duration-300 ease-in-out hover:scale-[2]"
             :src="baseFile.path"
+            :style="{ transformOrigin: imageZoomOrigin }"
             v-if="baseFile.type == 'image'"
             alt="{{ $product->name }}"
-            width="560"
-            height="610"
             tabindex="0"
             @click="isImageZooming = !isImageZooming"
             @load="onMediaLoad()"
@@ -83,7 +84,7 @@
         />
 
         <div
-            class="min-w-[450px] cursor-pointer rounded-xl"
+            class="min-w-[450px] cursor-pointer rounded-md"
             tabindex="0"
             v-if="baseFile.type == 'video'"
         >

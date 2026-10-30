@@ -12,11 +12,15 @@
         type="text/x-template"
         id="v-tabs-template"
     >
-        <div>
+        <div
+            class="pb-4 border border-zinc-200 rounded-t-md"
+            style="margin-top: 20px; margin-bottom: 20px;
+            margin-left: 100px; margin-right: 100px;"
+        >
             <div
-                class="flex flex-row justify-center gap-8 bg-zinc-100 max-sm:gap-1.5"
+                class="border border-zinc-200 rounded-t-md flex flex-row justify-start gap-8 max-sm:gap-1.5"
                 :style="positionStyles"
-            >
+             >
                 <div
                     role="button"
                     tabindex="0"
@@ -25,7 +29,7 @@
                     :class="{'border-b-2 border-navyBlue !text-black transition': tab.isActive }"
                     :id="tab.$attrs.id + '-button'"
                     @click="change(tab)"
-                >
+                 >
                     @{{ tab.title }}
                 </div>
             </div>

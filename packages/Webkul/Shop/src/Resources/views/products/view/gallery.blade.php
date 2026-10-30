@@ -31,6 +31,8 @@
                 return {
                     isImageZooming: false,
 
+                    imageZoomOrigin: '50% 50%',
+
                     isMediaLoading: true,
 
                     media: {
@@ -59,7 +61,7 @@
                         let selectedImage = newImages?.[this.activeIndex];
 
                         if (JSON.stringify(newImages) !== JSON.stringify(oldImages) && selectedImage?.large_image_url) {
-                            this.baseFile.path = selectedImage.large_image_url;
+                            this.baseFile.path = selectedImage.original_image_url || selectedImage.large_image_url;
                         }
                     },
                 },
@@ -70,7 +72,7 @@
 
                     this.baseFile.type = 'image';
 
-                    this.baseFile.path = this.media.images[0].large_image_url;
+                    this.baseFile.path = this.media.images[0].original_image_url || this.media.images[0].large_image_url;
                 } else if (this.media.videos.length) {
 
                     this.baseFile.type = 'video';
@@ -104,6 +106,18 @@
                     this.isMediaLoading = false;
                 },
 
+                updateZoomOrigin(event) {
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+                    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+
+                    this.imageZoomOrigin = `${x}% ${y}%`;
+                },
+
+                resetZoomOrigin() {
+                    this.imageZoomOrigin = '50% 50%';
+                },
+
                 change(media, index) {
                     this.isMediaLoading = true;
 
@@ -116,7 +130,7 @@
                     } else {
                         this.baseFile.type = 'image';
 
-                        this.baseFile.path = media.large_image_url;
+                        this.baseFile.path = media.original_image_url || media.large_image_url;
                     }
 
                     if (index > this.activeIndex) {

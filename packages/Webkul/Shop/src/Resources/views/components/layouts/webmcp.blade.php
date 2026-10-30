@@ -1,6 +1,7 @@
 {!! view_render_event('bagisto.shop.layout.webmcp.before') !!}
 
 <form
+    class="hidden"
     action="{{ route('shop.webmcp.product') }}"
     method="GET"
     toolname="view_product"
@@ -18,6 +19,7 @@
 </form>
 
 <form
+    class="hidden"
     action="{{ route('shop.webmcp.wishlist.add') }}"
     method="GET"
     toolname="add_to_wishlist"
@@ -35,6 +37,7 @@
 </form>
 
 <form
+    class="hidden"
     action="{{ route('shop.customers.account.wishlist.index') }}"
     method="GET"
     toolname="view_wishlist"
@@ -45,6 +48,7 @@
 </form>
 
 <form
+    class="hidden"
     action="{{ route('shop.checkout.cart.index') }}"
     method="GET"
     toolname="view_cart"
@@ -55,6 +59,7 @@
 </form>
 
 <form
+    class="hidden"
     action="{{ route('shop.checkout.onepage.index') }}"
     method="GET"
     toolname="proceed_to_checkout"

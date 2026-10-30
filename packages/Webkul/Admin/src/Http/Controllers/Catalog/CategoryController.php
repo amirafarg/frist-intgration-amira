@@ -82,7 +82,9 @@ class CategoryController extends Controller
             'display_mode',
             'attributes',
             'logo_path',
+            'logo_path_removed',
             'banner_path',
+            'banner_path_removed',
         ]);
 
         if (! empty($data['description'])) {
@@ -135,7 +137,9 @@ class CategoryController extends Controller
             'locale',
             'parent_id',
             'logo_path',
+            'logo_path_removed',
             'banner_path',
+            'banner_path_removed',
             'position',
             'display_mode',
             'status',

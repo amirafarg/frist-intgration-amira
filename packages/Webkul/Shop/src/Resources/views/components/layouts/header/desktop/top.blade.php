@@ -1,243 +1,41 @@
 {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.before') !!}
 
-<v-topbar>
-    <!-- Shimmer Effect -->
-    <div class="flex items-center justify-between border border-b border-l-0 border-r-0 border-t-0 px-16">
-        <!-- Currencies -->
-        <div class="flex w-20 items-center justify-between gap-2.5 py-3">
-            <div
-                class="shimmer h-6 w-12 rounded"
-                role="presentation"
-            >
-            </div>
+<div class="relative flex h-14 w-full items-center justify-between border-b border-zinc-200 px-[60px] max-1180:px-8">
+    <nav class="flex items-center gap-4" aria-label="Social media links">
+                <a href="https://facebook.com/keswa.stores" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center transition-colors hover:bg-grey/15" style="width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid #71717a; border-radius: 50%; color: #000" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; display: block; flex: 0 0 18px" aria-hidden="true">
+                        <path d="M13.8 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.5 1.6-1.5H17V3.7c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.2v2.1H7.8V13h2.7v8h3.3Z" />
+                    </svg>
+                </a>
 
-            <div
-                class="shimmer h-6 w-6 rounded"
-                role="presentation"
-            >
-            </div>
-        </div>
+                <a href="https://twitter.com/keswa.stores" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center transition-colors hover:bg-grey/15" style="width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid #71717a; border-radius: 50%; color: #000" aria-label="X">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; display: block; flex: 0 0 18px" aria-hidden="true">
+                        <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-7.1L5.8 22H2.7l7.2-8.3L2.2 2h6.4l4.4 6.5L18.9 2Zm-1.1 18h1.7L7.7 3.9H5.9L17.8 20Z" />
+                    </svg>
+                </a>
 
-        <!-- Offers -->
-        <div
-            class="shimmer h-6 w-72 rounded py-3"
-            role="presentation"
-        >
-        </div>
+                <a href="https://instagram.com/keswa.stores" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center transition-colors hover:bg-grey/15" style="width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid #71717a; border-radius: 50%; color: #000" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; display: block; flex: 0 0 18px" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="5" />
+                        <circle cx="12" cy="12" r="4" />
+                        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                    </svg>
+                </a>
 
-        <!-- Locales -->
-        <div class="flex w-32 items-center justify-between gap-2.5 py-3">
-            <div
-                class="shimmer h-6 w-6"
-                role="presentation"
-            >
-            </div>
+                <a href="https://tiktok.com/@keswa_wear" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center transition-colors hover:bg-grey/15" style="width: 28px; height: 28px; flex: 0 0 28px; border: 1px solid #71717a; border-radius: 50%; color: #000" aria-label="TikTok">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; display: block; flex: 0 0 18px" aria-hidden="true">
+                        <path d="M16.7 3c.4 2.3 1.7 3.7 4 3.9v3.1c-1.5 0-2.9-.5-4-1.3v6.5c0 4.1-4.5 6.5-7.9 4.3-2.2-1.5-2.8-4.5-1.4-6.7 1.3-2.1 4-2.8 6.1-1.7v3.2c-.8-.5-1.8-.5-2.5.1-.9.7-1 2.1-.3 3 .8 1 2.4.9 3.1-.1.3-.4.4-.8.4-1.3V3h2.5Z" />
+                    </svg>
+                </a>
+            </nav>
 
-            <div
-                class="shimmer h-6 w-14 rounded"
-                role="presentation"
-            >
-            </div>
+    <p class="absolute left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap text-xs font-medium">
+        <span>Your journey begins now . Shop now for 50% off.</span>
 
-            <div
-                class="shimmer h-6 w-6"
-                role="presentation"
-            >
-            </div>
-        </div>
-    </div>
-</v-topbar>
+        <a href="https://keswastore.com/search" class="font-semibold underline" style="color: #AF8234">SHOP NOW</a>
+    </p>
+
+    <a href="https://keswastore.com/contact-us" class="text-xs font-medium text-grey transition-colors hover:text-black">Contact Us</a>
+</div>
 
 {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.after') !!}
-
-@pushOnce('scripts')
-    <script
-        type="text/x-template"
-        id="v-topbar-template"
-    >
-        <div class="flex w-full items-center justify-between border border-b border-l-0 border-r-0 border-t-0 px-16">
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.currency_switcher.before') !!}
-
-            <!-- Currency Switcher -->
-            <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'left' : 'right' }}">
-                <!-- Dropdown Toggler -->
-                <x-slot:toggle>
-                    <div
-                        class="flex cursor-pointer gap-2.5 py-3"
-                        role="button"
-                        tabindex="0"
-                        @click="currencyToggler = ! currencyToggler"
-                    >
-                        <span v-pre>
-                            {{ core()->getCurrentCurrency()->symbol . ' ' . core()->getCurrentCurrencyCode() }}
-                        </span>
-
-                        <span
-                            class="text-2xl"
-                            :class="{'icon-arrow-up': currencyToggler, 'icon-arrow-down': ! currencyToggler}"
-                            role="presentation"
-                        >
-                        </span>
-                    </div>
-                </x-slot>
-
-                <!-- Dropdown Content -->
-                <x-slot:content class="journal-scroll max-h-[500px] !p-0">
-                    <v-currency-switcher></v-currency-switcher>
-                </x-slot>
-            </x-shop::dropdown>
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.currency_switcher.after') !!}
-
-            <p
-                class="py-3 text-xs font-medium"
-                v-pre
-            >
-                {{ core()->getConfigData('general.content.header_offer.title') }}
-                
-                <a 
-                    href="{{ core()->getConfigData('general.content.header_offer.redirection_link') }}" 
-                    class="underline"
-                    role="button"
-                >
-                    {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
-                </a>
-            </p>
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.locale_switcher.before') !!}
-
-            <!-- Locales Switcher -->
-            <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
-                <x-slot:toggle>
-                    <!-- Dropdown Toggler -->
-                    <div
-                        class="flex cursor-pointer items-center gap-2.5 py-3"
-                        role="button"
-                        tabindex="0"
-                        @click="localeToggler = ! localeToggler"
-                    >
-                        <img
-                            src="{{ ! empty(core()->getCurrentLocale()->logo_url)
-                                    ? core()->getCurrentLocale()->logo_url
-                                    : bagisto_asset('images/default-language.svg')
-                                }}"
-                            class="h-full"
-                            alt="@lang('shop::app.components.layouts.header.desktop.top.default-locale')"
-                            width="24"
-                            height="16"
-                        />
-                        
-                        <span v-pre>
-                            {{ core()->getCurrentChannel()->locales()->orderBy('name')->where('code', app()->getLocale())->value('name') }}
-                        </span>
-
-                        <span
-                            class="text-2xl"
-                            :class="{'icon-arrow-up': localeToggler, 'icon-arrow-down': ! localeToggler}"
-                            role="presentation"
-                        ></span>
-                    </div>
-                </x-slot>
-            
-                <!-- Dropdown Content -->
-                <x-slot:content class="journal-scroll max-h-[500px] !p-0">
-                    <v-locale-switcher></v-locale-switcher>
-                </x-slot>
-            </x-shop::dropdown>
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.locale_switcher.after') !!}
-        </div>
-    </script>
-
-    <script
-        type="text/x-template"
-        id="v-currency-switcher-template"
-    >
-        <div class="my-2.5 grid gap-1 overflow-auto max-md:my-0 sm:max-h-[500px]">
-            <span
-                class="cursor-pointer px-5 py-2 text-base hover:bg-gray-100"
-                v-for="currency in currencies"
-                :class="{'bg-gray-100': currency.code == '{{ core()->getCurrentCurrencyCode() }}'}"
-                @click="change(currency)"
-            >
-                @{{ currency.symbol + ' ' + currency.code }}
-            </span>
-        </div>
-    </script>
-
-    <script
-        type="text/x-template"
-        id="v-locale-switcher-template"
-    >
-        <div class="my-2.5 grid gap-1 overflow-auto max-md:my-0 sm:max-h-[500px]">
-            <span
-                class="flex cursor-pointer items-center gap-2.5 px-5 py-2 text-base hover:bg-gray-100"
-                :class="{'bg-gray-100': locale.code == '{{ app()->getLocale() }}'}"
-                v-for="locale in locales"
-                @click="change(locale)"                  
-            >
-                <img
-                    :src="locale.logo_url || '{{ bagisto_asset('images/default-language.svg') }}'"
-                    width="24"
-                    height="16"
-                />
-
-                @{{ locale.name }}
-            </span>
-        </div>
-    </script>
-
-    <script type="module">
-        app.component('v-topbar', {
-            template: '#v-topbar-template',
-
-            data() {
-                return {
-                    localeToggler: '',
-
-                    currencyToggler: '',
-                };
-            },
-        });
-
-        app.component('v-currency-switcher', {
-            template: '#v-currency-switcher-template',
-
-            data() {
-                return {
-                    currencies: @json(core()->getCurrentChannel()->currencies),
-                };
-            },
-
-            methods: {
-                change(currency) {
-                    let url = new URL(window.location.href);
-
-                    url.searchParams.set('currency', currency.code);
-
-                    window.location.href = url.href;
-                }
-            }
-        });
-
-        app.component('v-locale-switcher', {
-            template: '#v-locale-switcher-template',
-
-            data() {
-                return {
-                    locales: @json(core()->getCurrentChannel()->locales()->orderBy('name')->get()),
-                };
-            },
-
-            methods: {
-                change(locale) {
-                    let url = new URL(window.location.href);
-
-                    url.searchParams.set('locale', locale.code);
-
-                    window.location.href = url.href;
-                }
-            }
-        });
-    </script>
-@endPushOnce

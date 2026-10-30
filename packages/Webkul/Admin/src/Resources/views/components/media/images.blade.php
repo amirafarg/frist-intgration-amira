@@ -13,6 +13,7 @@
     'allowMultiple'    => false,
     'showPlaceholders' => false,
     'uploadedImages'   => [],
+    'removalField'     => '',
     'width'            => '120px',
     'height'           => '120px'
 ])
@@ -21,6 +22,7 @@
     name="{{ $name }}"
     v-bind:allow-multiple="{{ $allowMultiple ? 'true' : 'false' }}"
     v-bind:show-placeholders="{{ $showPlaceholders ? 'true' : 'false' }}"
+    removal-field="{{ $removalField }}"
     :uploaded-images='{{ json_encode($uploadedImages) }}'
     width="{{ $width }}"
     height="{{ $height }}"
@@ -36,6 +38,13 @@
     >
         <!-- Panel Content -->
         <div class="grid">
+            <input
+                v-if="removalField"
+                type="hidden"
+                :name="removalField"
+                :value="removedExistingImage ? 1 : 0"
+            >
+
             <div class="flex flex-wrap gap-1">
                 <!-- Upload Image Button -->
                 <template v-if="allowMultiple || images.length == 0">
@@ -388,7 +397,7 @@
 
                     <input
                         type="file"
-                        :name="name + '[]'"
+                        :name="image.is_new ? name + '[' + image.id + ']' : null"
                         class="hidden"
                         accept="image/*"
                         :id="$.uid + '_imageInput_' + index"
@@ -420,6 +429,11 @@
                     default: false,
                 },
 
+                removalField: {
+                    type: String,
+                    default: '',
+                },
+
                 uploadedImages: {
                     type: Array,
                     default: () => []
@@ -444,6 +458,8 @@
             data() {
                 return {
                     images: [],
+
+                    removedExistingImage: false,
 
                     placeholders: [
                         {
@@ -519,6 +535,8 @@
                     }
 
                     imageInput.files.forEach((file, index) => {
+                        this.removedExistingImage = false;
+
                         this.images.push({
                             id: 'image_' + this.images.length,
                             url: '',
@@ -531,6 +549,8 @@
                     let index = this.images.indexOf(image);
 
                     this.images.splice(index, 1);
+
+                    this.removedExistingImage = this.uploadedImages.length > 0 && this.images.length === 0;
                 },
 
                 generate(params, { setErrors }) {
@@ -646,6 +666,7 @@
 
                 setFile(file) {
                     this.image.is_new = 1;
+                    this.image.file = file;
 
                     const dataTransfer = new DataTransfer();
 

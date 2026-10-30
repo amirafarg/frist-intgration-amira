@@ -149,7 +149,10 @@
                                 @lang('admin::app.catalog.categories.create.logo-size')
                             </p>
 
-                            <x-admin::media.images name="logo_path" />
+                            <x-admin::media.images
+                                name="logo_path"
+                                removal-field="logo_path_removed"
+                            />
                         </div>
 
                         <!-- Add Banner -->
@@ -164,6 +167,7 @@
 
                             <x-admin::media.images
                                 name="banner_path"
+                                removal-field="banner_path_removed"
                                 width="220px"
                             />
                         </div>

@@ -1,8 +1,8 @@
-<div class="w-[418px] max-w-full max-md:w-full">
+<div class="cart-summary-card w-[420px] max-w-full max-md:w-full">
     {!! view_render_event('bagisto.shop.checkout.cart.summary.title.before') !!}
 
     <p
-        class="text-2xl font-medium max-md:text-base"
+        class="cart-summary-title text-2xl font-medium max-md:text-base"
         role="heading"
         aria-level="1"
     >
@@ -13,13 +13,6 @@
 
     <!-- Cart Totals -->
     <div class="mt-6 grid gap-4 max-md:mt-2 max-md:gap-2.5">
-        <!-- Estimate Tax and Shipping -->
-        @if (core()->getConfigData('sales.checkout.shopping_cart.estimate_shipping'))
-            <template v-if="cart.have_stockable_items">
-                @include('shop::checkout.cart.summary.estimate-shipping')
-            </template>
-        @endif
-
         <!-- Sub Total -->
         {!! view_render_event('bagisto.shop.checkout.cart.summary.sub_total.before') !!}
 
@@ -30,7 +23,7 @@
                 </p>
 
                 <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total_incl_tax }}
+                    @{{ formatCartPrice(cart.formatted_sub_total_incl_tax) }}
                 </p>
             </div>
         </template>
@@ -43,11 +36,11 @@
 
                 <div>
                     <p class="text-base font-medium max-sm:text-sm">
-                        @{{ cart.formatted_sub_total_incl_tax }}
+                        @{{ formatCartPrice(cart.formatted_sub_total_incl_tax) }}
                     </p>
 
                     <p class="text-xs italic text-gray-500 dark:text-gray-400">
-                        @lang('shop::app.checkout.cart.summary.excl-tax') @{{ cart.formatted_sub_total }}
+                        @lang('shop::app.checkout.cart.summary.excl-tax') @{{ formatCartPrice(cart.formatted_sub_total) }}
                     </p>
                 </div>
             </div>
@@ -60,7 +53,7 @@
                 </p>
 
                 <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total }}
+                    @{{ formatCartPrice(cart.formatted_sub_total) }}
                 </p>
             </div>
         </template>
@@ -140,163 +133,14 @@
         <!-- Apply Coupon -->
         {!! view_render_event('bagisto.shop.checkout.cart.summary.coupon.before') !!}
 
-        @include('shop::checkout.coupon')
+        @include('shop::checkout.coupon', ['showInlineForm' => true])
 
         {!! view_render_event('bagisto.shop.checkout.cart.summary.coupon.after') !!}
 
-        <!-- Shipping Rates -->
-        {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.before') !!}
-        
-        <template v-if="displayTax.shipping == 'including_tax'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    + @{{ cart.formatted_shipping_amount_incl_tax }}
-                </p>
-            </div>
-        </template>
-
-        <template v-else-if="displayTax.shipping == 'both'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges')
-                </p>
-
-                <div>
-                    <p class="text-base font-medium max-sm:text-sm">
-                        + @{{ cart.formatted_shipping_amount_incl_tax }}
-                    </p>
-
-                    <p class="text-xs italic text-gray-500 dark:text-gray-400">
-                        @lang('shop::app.checkout.cart.summary.excl-tax') @{{ cart.formatted_shipping_amount }}
-                    </p>
-                </div>
-            </div>
-        </template>
-
-        <template v-else>
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    + @{{ cart.formatted_shipping_amount }}
-                </p>
-            </div>
-        </template>
-
-        {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.after') !!}
-
-        <!-- Taxes -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.before') !!}
-
-        @php
-            $showTaxBreakdown = (bool) core()->getConfigData('sales.taxes.shopping_cart.show_tax_breakdown');
-        @endphp
-
-        <div
-            class="flex justify-between text-right"
-            v-if="! cart.tax_total"
-        >
-            <p class="text-base max-md:font-normal max-sm:text-sm">
-                @lang('shop::app.checkout.cart.summary.tax')
-            </p>
-
-            <p class="text-lg font-semibold max-md:text-sm">
-                + @{{ cart.formatted_tax_total }}
-            </p>
+        <div class="cart-delivery-note flex items-center justify-between gap-4">
+            <p>Delivery Charges</p>
+            <p class="text-right text-zinc-500">Calculated after area selection</p>
         </div>
-
-        @if ($showTaxBreakdown)
-            <div
-                class="flex flex-col gap-2 border-y py-2"
-                v-else
-            >
-                <div
-                    class="flex cursor-pointer items-center justify-between gap-2 text-right"
-                    @click="cart.show_taxes = ! cart.show_taxes"
-                >
-                    <p class="text-base max-md:font-normal max-sm:text-sm">
-                        @lang('shop::app.checkout.cart.summary.tax')
-                    </p>
-
-                    <p class="flex items-center gap-1.5 text-base font-medium max-md:font-medium max-sm:text-sm">
-                        <template v-if="displayTax.subtotal === 'including_tax' || displayTax.subtotal === 'both'">
-                            @{{ cart.formatted_tax_total }}
-
-                            <span class="text-xs italic font-normal text-gray-500 dark:text-gray-400">
-                                (@lang('shop::app.checkout.cart.summary.included'))
-                            </span>
-                        </template>
-
-                        <template v-else>+ @{{ cart.formatted_tax_total }}</template>
-
-                        <span
-                            class="text-xl"
-                            :class="{'icon-arrow-up': cart.show_taxes, 'icon-arrow-down': ! cart.show_taxes}"
-                        ></span>
-                    </p>
-                </div>
-
-                <div
-                    class="flex flex-col gap-2"
-                    v-show="cart.show_taxes"
-                >
-                    <div
-                        class="flex flex-col gap-1"
-                        v-for="taxLine in cart.applied_taxes_breakdown"
-                    >
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
-                            @{{ taxLine.rate }}
-                        </p>
-
-                        <div
-                            class="flex items-center justify-between gap-2 pl-3"
-                            v-for="product in taxLine.items"
-                        >
-                            <p class="truncate text-xs text-gray-400 dark:text-gray-500">
-                                @{{ product.name }}
-                            </p>
-
-                            <p class="shrink-0 whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">
-                                <template v-if="displayTax.subtotal === 'including_tax' || displayTax.subtotal === 'both'">@{{ product.tax_amount }}</template>
-
-                                <template v-else>+ @{{ product.tax_amount }}</template>
-
-                                <span class="italic">(@{{ product.taxable_amount }})</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @else
-            <div
-                class="flex justify-between text-right"
-                v-else
-            >
-                <p class="text-base max-md:font-normal max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.tax')
-                </p>
-
-                <p class="flex items-center justify-end gap-1.5 text-lg font-semibold max-md:text-sm">
-                    <template v-if="displayTax.subtotal === 'including_tax' || displayTax.subtotal === 'both'">
-                        @{{ cart.formatted_tax_total }}
-
-                        <span class="text-xs italic font-normal text-gray-500 dark:text-gray-400">
-                            (@lang('shop::app.checkout.cart.summary.included'))
-                        </span>
-                    </template>
-
-                    <template v-else>+ @{{ cart.formatted_tax_total }}</template>
-                </p>
-            </div>
-        @endif
-
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.after') !!}
 
         <!-- Cart Grand Total -->
         {!! view_render_event('bagisto.shop.checkout.cart.summary.grand_total.before') !!}
@@ -307,7 +151,7 @@
             </p>
 
             <p class="text-lg font-semibold max-md:text-base">
-                @{{ cart.formatted_grand_total }}
+                @{{ formatCartPrice(cart.formatted_grand_total) }}
             </p>
         </div>
 
@@ -317,7 +161,7 @@
 
         <a
             href="{{ route('shop.checkout.onepage.index') }}"
-            class="primary-button mt-4 place-self-end rounded-2xl px-11 py-3 max-md:my-4 max-md:max-w-full max-md:rounded-lg max-md:py-3 max-md:text-sm max-sm:w-full max-sm:py-2"
+            class="primary-button cart-proceed-button mt-4 place-self-end px-11 py-3 max-md:my-4 max-md:max-w-full max-md:py-3 max-md:text-sm max-sm:w-full max-sm:py-2"
         >
             @lang('shop::app.checkout.cart.summary.proceed-to-checkout')
         </a>

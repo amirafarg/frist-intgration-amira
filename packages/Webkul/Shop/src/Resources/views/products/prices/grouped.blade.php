@@ -3,5 +3,5 @@
 </p>
 
 <p class="font-semibold max-sm:leading-4">
-    {{ $prices['final']['formatted_price'] }}
+    {{ preg_replace('/([.,])0+(?=\D|$)/u', '', $prices['final']['formatted_price']) }}
 </p>

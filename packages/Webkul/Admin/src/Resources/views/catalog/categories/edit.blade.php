@@ -196,6 +196,7 @@
 
                             <x-admin::media.images
                                 name="logo_path"
+                                removal-field="logo_path_removed"
                                 :uploaded-images="$category->logo_path ? [['id' => 'logo_path', 'url' => $category->logo_url]] : []"
                             />
                         </div>
@@ -212,6 +213,7 @@
 
                             <x-admin::media.images
                                 name="banner_path"
+                                removal-field="banner_path_removed"
                                 :uploaded-images="$category->banner_path ? [['id' => 'banner_path', 'url' => $category->banner_url]] : []"
                                 width="220px"
                             />

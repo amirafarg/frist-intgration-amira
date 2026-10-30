@@ -159,13 +159,36 @@ class Configurable extends AbstractType
                 foreach ($product->super_attributes as $superAttribute) {
                     $superAttributes[$superAttribute->id] = $variantData[$superAttribute->code];
 
-                    $this->fillableVariantAttributes->push($superAttribute);
+                    if (! $this->fillableVariantAttributes->contains('id', $superAttribute->id)) {
+                        $this->fillableVariantAttributes->push($superAttribute);
+                    }
                 }
 
-                $this->createVariant($product, $superAttributes, array_merge($variantData, [
-                    'channel' => $data['channel'] ?? core()->getDefaultChannelCode(),
-                    'locale' => $data['locale'] ?? core()->getDefaultLocaleCodeFromDefaultChannel(),
-                ]));
+                $variantSku = $product->sku.'-variant-'.implode('-', $superAttributes);
+
+                $existingVariant = $product->variants()
+                    ->where('sku', $variantSku)
+                    ->first();
+
+                if ($existingVariant) {
+                    $index = $previousVariantIds->search($existingVariant->id);
+
+                    if (is_numeric($index)) {
+                        $previousVariantIds->forget($index);
+                    }
+
+                    $this->updateVariant(array_merge($variantData, [
+                        'sku' => $variantSku,
+                        'channel' => $data['channel'] ?? core()->getDefaultChannelCode(),
+                        'locale' => $data['locale'] ?? core()->getDefaultLocaleCodeFromDefaultChannel(),
+                        'tax_category_id' => $data['tax_category_id'] ?? null,
+                    ]), $existingVariant->id);
+                } else {
+                    $this->createVariant($product, $superAttributes, array_merge($variantData, [
+                        'channel' => $data['channel'] ?? core()->getDefaultChannelCode(),
+                        'locale' => $data['locale'] ?? core()->getDefaultLocaleCodeFromDefaultChannel(),
+                    ]));
+                }
             } else {
                 if (is_numeric($index = $previousVariantIds->search($variantId))) {
                     $previousVariantIds->forget($index);
@@ -346,6 +369,45 @@ class Configurable extends AbstractType
         $regularMinPrice = $this->getRegularMinimalPrice();
 
         $minPrice = $this->getMinimalPrice();
+
+        if ($regularMinPrice <= 0 && (float) $this->product->price > 0) {
+            $regularMinPrice = (float) $this->product->price;
+
+            $minPrice = $regularMinPrice;
+        }
+
+        // Apply the configurable parent's active special price to its variants
+        // as a discount ratio, including when variant prices are available.
+        if (
+            (float) $this->product->price > 0
+            && (float) $this->product->special_price > 0
+            && core()->isChannelDateInInterval(
+                $this->product->special_price_from,
+                $this->product->special_price_to
+            )
+        ) {
+            $parentDiscountRatio = min(1, (float) $this->product->special_price / (float) $this->product->price);
+
+            $minPrice = min($minPrice, $regularMinPrice * $parentDiscountRatio);
+        }
+
+        // Some configurable parents have no price of their own. In that case,
+        // use the cheapest enabled variant so the storefront can show a price
+        // before the customer chooses its attributes.
+        if ($regularMinPrice <= 0) {
+            $variantPrices = $this->product->variants()
+                ->get()
+                ->filter(fn ($variant) => $variant->status)
+                ->map(fn ($variant) => $variant->getTypeInstance()->getProductPrices());
+
+            $regularPrices = $variantPrices->pluck('regular.price')->filter(fn ($price) => (float) $price > 0);
+            $finalPrices = $variantPrices->pluck('final.price')->filter(fn ($price) => (float) $price > 0);
+
+            if ($regularPrices->isNotEmpty()) {
+                $regularMinPrice = $regularPrices->min();
+                $minPrice = $finalPrices->isNotEmpty() ? $finalPrices->min() : $regularMinPrice;
+            }
+        }
 
         return [
             'regular' => [

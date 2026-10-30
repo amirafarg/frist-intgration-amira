@@ -2,14 +2,37 @@
 
 <!-- Desktop Filters Navigation -->
 <div v-if="! isMobile">
-    <!-- Filters Vue Component -->
-    <v-filters
-        @filter-applied="setFilters('filter', $event)"
-        @filter-clear="clearFilters('filter', $event)"
+    <x-shop::drawer
+        position="left"
+        width="340px"
+        ::is-active="isDrawerActive.filter"
+        @close="isDrawerActive.filter = false"
     >
-        <!-- Category Filter Shimmer Effect -->
-        <x-shop::shimmer.categories.filters />
-    </v-filters>
+        <x-slot:toggle>
+            <button
+                class="category-filter-trigger flex min-w-[144px] items-center justify-center gap-3 border border-zinc-200 bg-white px-5 py-3 text-sm uppercase"
+                type="button"
+            >
+                <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
+                @lang('shop::app.categories.filters.filter')
+            </button>
+        </x-slot>
+
+        <x-slot:header>
+            <p class="text-lg font-semibold">@lang('shop::app.categories.filters.filters')</p>
+        </x-slot>
+
+        <x-slot:content>
+            <v-filters
+                @filter-applied="setFilters('filter', $event)"
+                @filter-clear="clearFilters('filter', $event)"
+            >
+                <x-shop::shimmer.categories.filters />
+            </v-filters>
+        </x-slot>
+    </x-shop::drawer>
 </div>
 
 <!-- Mobile Filters Navigation -->
@@ -29,7 +52,9 @@
                 class="flex cursor-pointer items-center gap-x-2.5 px-2.5 py-3.5 text-base font-medium uppercase max-md:py-3"
                 @click="isDrawerActive.filter = true"
             >
-                <span class="icon-filter-1 text-2xl"></span>
+                <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
 
                 @lang('shop::app.categories.filters.filter')
             </div>
@@ -42,12 +67,6 @@
                     @lang('shop::app.categories.filters.filters')
                 </p>
 
-                <p
-                    class="cursor-pointer text-sm font-medium ltr:mr-[50px] rtl:ml-[50px]"
-                    @click="clearFilters('filter', '')"
-                >
-                    @lang('shop::app.categories.filters.clear-all')
-                </p>
             </div>
         </x-slot>
 
@@ -116,31 +135,24 @@
 
         <!-- Filters Container -->
         <template v-else>
-            <div class="panel-side journal-scroll grid max-h-[1320px] min-w-[342px] grid-cols-[1fr] overflow-y-auto overflow-x-hidden max-xl:min-w-[270px] md:max-w-[342px] md:ltr:pr-7 md:rtl:pl-7">
-                <!-- Filters Header Container -->
-                <div class="flex h-[50px] items-center justify-between border-b border-zinc-200 pb-2.5 max-md:hidden">
-                    <p class="text-lg font-semibold max-sm:font-medium">
-                        @lang('shop::app.categories.filters.filters')
-                    </p>
-
-                    <p
-                        class="cursor-pointer text-xs font-medium"
-                        tabindex="0"
-                        @click="clear()"
-                    >
-                        @lang('shop::app.categories.filters.clear-all')
-                    </p>
-                </div>
-
+            <div class="panel-side journal-scroll grid max-h-[1320px] min-w-0 grid-cols-[1fr] overflow-y-auto overflow-x-hidden md:max-w-full md:ltr:pr-7 md:rtl:pl-7">
                 <!-- Filters Items Vue Component -->
                 <v-filter-item
                     ref="filterItemComponent"
                     :key="filterIndex"
                     :filter="filter"
-                    v-for='(filter, filterIndex) in filters.available'
+                    v-for='(filter, filterIndex) in visibleFilters'
                     @values-applied="applyFilter(filter, $event)"
                 >
                 </v-filter-item>
+
+                <button
+                    class="justify-self-start bg-black px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-85"
+                    type="button"
+                    @click="clear()"
+                >
+                    @lang('shop::app.categories.filters.clear-all')
+                </button>
             </div>
         </template>
     </script>
@@ -351,6 +363,23 @@
                         applied: {},
                     },
                 };
+            },
+
+            computed: {
+                visibleFilters() {
+                    const filters = Array.isArray(this.filters.available)
+                        ? this.filters.available
+                        : Object.values(this.filters.available || {});
+
+                    const brandIndex = filters.findIndex(filter => {
+                        const code = String(filter.code || '').toLowerCase();
+                        const name = String(filter.name || '').toLowerCase();
+
+                        return code.includes('brand') || name.includes('brand') || filter.type === 'brand';
+                    });
+
+                    return brandIndex === -1 ? filters : filters.slice(0, brandIndex);
+                },
             },
 
             mounted() {

@@ -32,8 +32,8 @@
                 aria-label="@lang('shop::app.customers.signup-form.bagisto')"
             >
                 <img
-                    src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
+                    src="{{ bagisto_asset('images/logo.svg', 'shop') }}"
+                    alt="Keswa"
                     width="131"
                     height="29"
                 >
@@ -138,7 +138,6 @@
                             rules="required|min:6"
                             :value="old('password')"
                             :label="trans('shop::app.customers.signup-form.password')"
-                            :placeholder="trans('shop::app.customers.signup-form.password')"
                             ref="password"
                             :aria-label="trans('shop::app.customers.signup-form.password')"
                             aria-required="true"
@@ -162,7 +161,6 @@
                             rules="confirmed:@password"
                             value=""
                             :label="trans('shop::app.customers.signup-form.password')"
-                            :placeholder="trans('shop::app.customers.signup-form.confirm-pass')"
                             :aria-label="trans('shop::app.customers.signup-form.confirm-pass')"
                             aria-required="true"
                         />

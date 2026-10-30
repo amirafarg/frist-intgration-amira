@@ -1,7 +1,7 @@
 <!-- Checkout Login Vue JS Component -->
 <v-checkout-login>
     <div class="flex items-center">
-        <span class="cursor-pointer text-base font-medium text-blue-700">
+        <span class="cart-login-link cursor-pointer text-base font-medium">
             @lang('shop::app.checkout.login.title')
         </span>
     </div>
@@ -17,7 +17,7 @@
         <div>
             <div class="flex items-center">
                 <span
-                    class="cursor-pointer text-base font-medium text-blue-700"
+                    class="cart-login-link cursor-pointer text-base font-medium"
                     role="button"
                     @click="$refs.loginModel.open()"
                 >
@@ -37,16 +37,19 @@
                     {!! view_render_event('bagisto.shop.checkout.login.form_controls.before') !!}
 
                     <!-- Login modal -->
-                    <x-shop::modal ref="loginModel">
+                    <x-shop::modal
+                        ref="loginModel"
+                        panel-class="cart-sign-in-panel max-w-[680px]"
+                    >
                         <!-- Modal Header -->
-                        <x-slot:header>
+                        <x-slot:header class="cart-sign-in-modal-header">
                             <h2 class="text-2xl font-medium max-md:text-base">
                                 @lang('shop::app.checkout.login.title')
                             </h2>
                         </x-slot>
 
                         <!-- Modal Content -->
-                        <x-slot:content>
+                        <x-slot:content class="cart-sign-in-modal-content">
                             <!-- Email -->
                             <x-shop::form.control-group>
                                 <x-shop::form.control-group.label class="required">
@@ -80,7 +83,6 @@
                                     name="password"
                                     rules="required|min:6"
                                     :label="trans('shop::app.checkout.login.password')"
-                                    :placeholder="trans('shop::app.checkout.login.password')"
                                     :aria-label="trans('shop::app.checkout.login.password')"
                                     aria-required="true"
                                 />
@@ -99,10 +101,10 @@
                         </x-slot>
 
                         <!-- Modal Footer -->
-                        <x-slot:footer>
+                        <x-slot:footer class="cart-sign-in-modal-footer">
                             <div class="flex flex-wrap items-center gap-4">
                                 <x-shop::button
-                                    class="primary-button max-w-none flex-auto rounded-sm px-11 py-3 max-md:rounded-lg max-md:py-1.5"
+                                    class="primary-button cart-sign-in-submit max-w-none flex-auto rounded-sm px-11 py-3 max-md:rounded-lg max-md:py-1.5"
                                     :title="trans('shop::app.checkout.login.title')"
                                     ::loading="isStoring"
                                     ::disabled="isStoring"

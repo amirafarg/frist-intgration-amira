@@ -20,7 +20,7 @@
 <!-- Features -->
 @if ($customization)
     <div
-        class="container mt-20 max-lg:px-8 max-md:mt-10 max-md:px-4"
+        class="hidden container mt-20 max-lg:px-8 max-md:mt-10 max-md:px-4"
         v-pre
     >
         <div class="max-md:max-y-6 flex justify-center gap-6 max-lg:flex-wrap max-md:grid max-md:grid-cols-2 max-md:gap-x-2.5 max-md:text-center">

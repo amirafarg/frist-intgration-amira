@@ -199,7 +199,6 @@
                     name="current_password"
                     value=""
                     :label="trans('shop::app.customers.account.profile.edit.current-password')"
-                    :placeholder="trans('shop::app.customers.account.profile.edit.current-password')"
                 />
 
                 <x-shop::form.control-group.error control-name="current_password" />
@@ -218,7 +217,6 @@
                     name="new_password"
                     value=""
                     :label="trans('shop::app.customers.account.profile.edit.new-password')"
-                    :placeholder="trans('shop::app.customers.account.profile.edit.new-password')"
                 />
 
                 <x-shop::form.control-group.error control-name="new_password" />
@@ -238,7 +236,6 @@
                     rules="confirmed:@new_password"
                     value=""
                     :label="trans('shop::app.customers.account.profile.edit.confirm-password')"
-                    :placeholder="trans('shop::app.customers.account.profile.edit.confirm-password')"
                 />
 
                 <x-shop::form.control-group.error control-name="new_password_confirmation" />

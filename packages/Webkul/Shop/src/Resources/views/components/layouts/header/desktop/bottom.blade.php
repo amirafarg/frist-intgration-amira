@@ -11,13 +11,14 @@
 
         <a
             href="{{ route('shop.home.index') }}"
+            class="shrink-0"
             aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.bagisto')"
         >
             <img
-                src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
+                src="{{ bagisto_asset('images/logo.svg', 'shop') }}"
                 width="131"
                 height="29"
-                alt="{{ config('app.name') }}"
+                alt="Keswa"
             >
         </a>
 
@@ -48,78 +49,86 @@
     </div>
 
     <!-- Right Nagivation Section -->
-    <div class="flex items-center gap-x-9 max-[1100px]:gap-x-6 max-lg:gap-x-8">
+    <div class="flex items-center gap-x-5 max-[1100px]:gap-x-6 max-lg:gap-x-8">
 
         {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.search_bar.before') !!}
 
-        <!-- Search Bar Container -->
-        <div class="relative w-full">
-            <form
-                action="{{ route('shop.search.index') }}"
-                class="flex max-w-[445px] items-center"
-                role="search"
-                toolname="search_products"
-                tooldescription="{{ trans('shop::app.components.layouts.webmcp.search-products') }}"
-                toolautosubmit
-            >
-                <label
-                    for="organic-search"
-                    class="sr-only"
-                >
-                    @lang('shop::app.components.layouts.header.desktop.bottom.search')
-                </label>
+        <!-- Search Icon and Fullscreen Search Overlay -->
+        <button
+            type="button"
+            class="flex cursor-pointer items-center text-2xl transition-colors hover:text-grey"
+            aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+            onclick="document.getElementById('desktop-search-dialog').showModal()"
+        >
+            <span class="icon-search" role="presentation"></span>
+        </button>
 
-                <div class="icon-search pointer-events-none absolute top-2.5 flex items-center text-xl ltr:left-3 rtl:right-3"></div>
-
-                <input
-                    type="text"
-                    name="query"
-                    value="{{ request('query') }}"
-                    toolparamdescription="{{ trans('shop::app.components.layouts.webmcp.search-products-query') }}"
-                    class="block w-full py-3 text-xs font-medium text-gray-900 transition-all border border-transparent rounded-lg bg-zinc-100 px-11 hover:border-gray-400 focus:border-gray-400"
-                    minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
-                    maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
-                    placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
-                    aria-required="true"
-                    pattern="[^\\]+"
-                    required
-                >
-
+        <dialog
+            id="desktop-search-dialog"
+            class="desktop-search-dialog"
+            aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+        >
+            <div class="desktop-search-dialog-panel">
                 <button
-                    type="submit"
-                    class="hidden"
-                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"
+                    type="button"
+                    class="desktop-search-dialog-close"
+                    aria-label="Close search"
+                    onclick="this.closest('dialog').close()"
                 >
+                    <svg
+                        width="28"
+                        height="28"
+                        viewBox="0 0 28 28"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        <path d="M4 4L24 24M24 4L4 24" stroke="currentColor" stroke-width="2" />
+                    </svg>
                 </button>
 
-                @if (core()->getConfigData('catalog.products.settings.image_search'))
-                    @include('shop::search.images.index')
-                @endif
-            </form>
-        </div>
+                <form
+                    action="{{ route('shop.search.index') }}"
+                    class="desktop-search-dialog-form"
+                    role="search"
+                    toolname="search_products"
+                    tooldescription="{{ trans('shop::app.components.layouts.webmcp.search-products') }}"
+                    toolautosubmit
+                >
+                    <label for="organic-search" class="sr-only">
+                        @lang('shop::app.components.layouts.header.desktop.bottom.search')
+                    </label>
+
+                    <span class="desktop-search-dialog-icon icon-search" role="presentation"></span>
+
+                    <input
+                        id="organic-search"
+                        type="text"
+                        name="query"
+                        value="{{ request('query') }}"
+                        toolparamdescription="{{ trans('shop::app.components.layouts.webmcp.search-products-query') }}"
+                        class="desktop-search-dialog-input"
+                        minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
+                        maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
+                        placeholder="Search products here"
+                        aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
+                        aria-required="true"
+                        pattern="[^\\]+"
+                        required
+                    >
+
+                    <button type="submit" class="hidden" aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.submit')"></button>
+
+                    @if (core()->getConfigData('catalog.products.settings.image_search'))
+                        @include('shop::search.images.index')
+                    @endif
+                </form>
+            </div>
+        </dialog>
 
         {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.search_bar.after') !!}
 
         <!-- Right Navigation Links -->
-        <div class="mt-1.5 flex gap-x-8 max-[1100px]:gap-x-6 max-lg:gap-x-8">
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.compare.before') !!}
-
-            <!-- Compare -->
-            @if(core()->getConfigData('catalog.products.settings.compare_option'))
-                <a
-                    href="{{ route('shop.compare.index') }}"
-                    aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.compare')"
-                >
-                    <span
-                        class="inline-block text-2xl cursor-pointer icon-compare"
-                        role="presentation"
-                    ></span>
-                </a>
-            @endif
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.compare.after') !!}
+        <div class="mt-1.5 flex gap-x-5 max-[1100px]:gap-x-6 max-lg:gap-x-8">
 
             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.mini_cart.before') !!}
 
@@ -133,10 +142,10 @@
             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.profile.before') !!}
 
             <!-- user profile -->
-            <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
+            <x-shop::dropdown class="account-menu-dropdown" position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                 <x-slot:toggle>
                     <span
-                        class="inline-block text-2xl cursor-pointer icon-users"
+                        class="inline-block cursor-pointer text-2xl transition-colors hover:text-grey icon-users"
                         role="button"
                         aria-label="@lang('shop::app.components.layouts.header.desktop.bottom.profile')"
                         tabindex="0"
@@ -145,34 +154,34 @@
 
                 <!-- Guest Dropdown -->
                 @guest('customer')
-                    <x-slot:content>
-                        <div class="grid gap-2.5">
-                            <p class="text-xl font-dmserif">
+                    <x-slot:content class="account-menu-card">
+                        <div class="account-menu-copy">
+                            <p class="account-menu-title">
                                 @lang('shop::app.components.layouts.header.desktop.bottom.welcome-guest')
                             </p>
 
-                            <p class="text-sm">
+                            <p class="account-menu-description">
                                 @lang('shop::app.components.layouts.header.desktop.bottom.dropdown-text')
                             </p>
                         </div>
 
-                        <p class="w-full mt-3 border border-zinc-200"></p>
+                        <div class="account-menu-divider"></div>
 
                         {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.customers_action.before') !!}
 
-                        <div class="flex gap-4 mt-6">
+                        <div class="account-menu-actions">
                             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.sign_in_button.before') !!}
 
                             <a
                                 href="{{ route('shop.customer.session.create') }}"
-                                class="block m-0 mx-auto text-base text-center primary-button w-max rounded-2xl px-7 max-md:rounded-lg ltr:ml-0 rtl:mr-0"
+                                class="account-menu-sign-in"
                             >
                                 @lang('shop::app.components.layouts.header.desktop.bottom.sign-in')
                             </a>
 
                             <a
                                 href="{{ route('shop.customers.register.index') }}"
-                                class="block m-0 mx-auto text-base text-center border-2 secondary-button w-max rounded-2xl px-7 max-md:rounded-lg max-md:py-3 ltr:ml-0 rtl:mr-0"
+                                class="account-menu-sign-up"
                             >
                                 @lang('shop::app.components.layouts.header.desktop.bottom.sign-up')
                             </a>
@@ -295,13 +304,13 @@
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
+                class="group relative flex h-[77px] shrink-0 items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
                 v-for="category in categories"
             >
                 <span>
                     <a
                         :href="category.url"
-                        class="inline-block px-5 uppercase"
+                        class="inline-block whitespace-nowrap px-3 text-base uppercase"
                     >
                         @{{ category.name }}
                     </a>
@@ -347,27 +356,25 @@
         <div v-else>
             <!-- Categories Navigation -->
             <div class="flex items-center">
-                <!-- "All" button for opening the category drawer -->
+                <!-- "berger" button for opening the category drawer-responsive -->
                 <div
-                    class="flex h-[77px] cursor-pointer items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
+                    class="hidden max-md:flex h-[77px] cursor-pointer items-center border-b-2 border-transparent hover:border-b-2 hover:border-black"
                     @click="toggleCategoryDrawer"
-                >
+                 >
                     <span class="flex items-center gap-1 px-5 uppercase">
-                        <span class="text-xl icon-hamburger"></span>
-
-                        @lang('shop::app.components.layouts.header.desktop.bottom.all')
+                        <span class="text-3xl icon-hamburger"></span>
                     </span>
                 </div>
 
                 <!-- Show only first 4 categories in main navigation -->
                 <div
-                    class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
-                    v-for="category in categories.slice(0, 4)"
+                    class="group relative flex h-[77px] shrink-0 items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
+                    v-for="category in categories"
                 >
                     <span>
                         <a
                             :href="category.url"
-                            class="inline-block px-5 uppercase"
+                            class="inline-block whitespace-nowrap px-3 text-base uppercase"
                         >
                             @{{ category.name }}
                         </a>
@@ -547,18 +554,6 @@
 
             methods: {
                 initCategories() {
-                    try {
-                        const stored = localStorage.getItem('categories');
-
-                        if (stored) {
-                            this.categories = JSON.parse(stored);
-                            this.isLoading = false;
-
-                            return;
-                        }
-
-                    } catch (e) {}
-
                     this.getCategories();
                 },
 
@@ -567,7 +562,6 @@
                         .then(response => {
                             this.isLoading = false;
                             this.categories = response.data.data;
-                            localStorage.setItem('categories', JSON.stringify(this.categories));
                         })
                         .catch(error => {
                             console.log(error);

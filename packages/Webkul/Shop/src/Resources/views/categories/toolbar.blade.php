@@ -13,92 +13,73 @@
     >
         <div>
             <!-- Desktop Toolbar -->
-            <div class="flex justify-between max-md:hidden">
+            <div class="category-toolbar-desktop grid grid-cols-2 items-center max-md:hidden">
                 {!! view_render_event('bagisto.shop.categories.toolbar.filter.before') !!}
 
-                <!-- Product Sorting Filters -->
                 <x-shop::dropdown
-                    class="z-[1]"
+                    class="category-sort-control z-[1] col-start-2 row-start-1"
                     position="bottom-left"
                 >
                     <x-slot:toggle>
-                        <!-- Dropdown Toggler -->
-                        <button class="flex w-full max-w-[200px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white p-3.5 text-base transition-all hover:border-gray-400 focus:border-gray-400 max-md:w-[110px] max-md:border-0 max-md:pl-2.5 max-md:pr-2.5">
+                        <button class="flex w-full max-w-[220px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white px-5 py-3 text-sm transition-all hover:border-gray-400 focus:border-gray-400">
                             @{{ sortLabel ?? "@lang('shop::app.products.sort-by.title')" }}
 
-                            <span
-                                class="icon-arrow-down text-2xl"
-                                role="presentation"
-                            ></span>
+                            <span class="icon-arrow-down text-xl" role="presentation"></span>
                         </button>
                     </x-slot>
 
-                    <!-- Dropdown Content -->
                     <x-slot:menu>
                         <x-shop::dropdown.menu.item
                             v-for="(sort, key) in filters.available.sort"
                             ::class="{'bg-gray-100': sort.value == filters.applied.sort}"
                             @click="apply('sort', sort.value)"
                         >
-                            @{{ sort.title }}
+                            @{{ sort.value === 'created_at-desc' ? 'Newest First' : sort.title }}
                         </x-shop::dropdown.menu.item>
                     </x-slot>
                 </x-shop::dropdown>
 
                 {!! view_render_event('bagisto.shop.categories.toolbar.filter.after') !!}
-
                 {!! view_render_event('bagisto.shop.categories.toolbar.pagination.before') !!}
 
-                <!-- Product Pagination Limit -->
-                <div class="flex items-center gap-10">
-                    <!-- Product Pagination Limit -->
-                    <x-shop::dropdown position="bottom-right">
-                        <x-slot:toggle>
-                            <!-- Dropdown Toggler -->
-                            <button class="flex w-full max-w-[200px] cursor-pointer items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white p-3.5 text-base transition-all hover:border-gray-400 focus:border-gray-400 max-md:w-[110px] max-md:border-0 max-md:pl-2.5 max-md:pr-2.5">
-                                @{{ filters.applied.limit ?? "@lang('shop::app.categories.toolbar.show')" }}
+                <div class="category-view-modes col-start-1 row-start-1 flex items-center gap-5">
+                    <span
+                        class="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        style="width: 28px; height: 28px; flex: 0 0 28px"
+                        role="button"
+                        aria-label="@lang('shop::app.categories.toolbar.list')"
+                        tabindex="0"
+                        :class="((filters.applied.mode ?? filters.default.mode) === 'list') ? 'text-zinc-900' : 'text-zinc-400'"
+                        @click="changeMode('list')"
+                    >
+                        <svg aria-hidden="true" class="h-6 w-6" style="width:24px;height:24px" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="4" cy="5" r="1.7" />
+                            <circle cx="4" cy="12" r="1.7" />
+                            <circle cx="4" cy="19" r="1.7" />
+                            <rect x="9" y="3.8" width="14" height="2.4" rx="1.2" />
+                            <rect x="9" y="10.8" width="14" height="2.4" rx="1.2" />
+                            <rect x="9" y="17.8" width="14" height="2.4" rx="1.2" />
+                        </svg>
+                    </span>
 
-                                <span
-                                    class="icon-arrow-down text-2xl"
-                                    role="presentation"
-                                ></span>
-                            </button>
-                        </x-slot>
-
-                        <!-- Dropdown Content -->
-                        <x-slot:menu>
-                            <x-shop::dropdown.menu.item
-                                v-for="(limit, key) in filters.available.limit"
-                                ::class="{'bg-gray-100': limit == filters.applied.limit}"
-                                @click="apply('limit', limit)"
-                            >
-                                @{{ limit }}
-                            </x-shop::dropdown.menu.item>
-                        </x-slot>
-                    </x-shop::dropdown>
-
-                    <!-- Listing Mode Switcher -->
-                    <div class="flex items-center gap-5">
-                        <span
-                            class="cursor-pointer text-2xl"
-                            role="button"
-                            aria-label="@lang('shop::app.categories.toolbar.list')"
-                            tabindex="0"
-                            :class="(filters.applied.mode === 'list') ? 'icon-listing-fill' : 'icon-listing'"
-                            @click="changeMode('list')"
-                        >
-                        </span>
-
-                        <span
-                            class="cursor-pointer text-2xl"
-                            role="button"
-                            aria-label="@lang('shop::app.categories.toolbar.grid')"
-                            tabindex="0"
-                            :class="(filters.applied.mode === 'grid') ? 'icon-grid-view-fill' : 'icon-grid-view'"
-                            @click="changeMode('grid')"
-                        >
-                        </span>
-                    </div>
+                    <span
+                        class="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        style="width: 28px; height: 28px; flex: 0 0 28px"
+                        role="button"
+                        aria-label="@lang('shop::app.categories.toolbar.grid')"
+                        tabindex="0"
+                        :class="((filters.applied.mode ?? filters.default.mode) === 'grid') ? 'text-zinc-900' : 'text-zinc-400'"
+                        @click="changeMode('grid')"
+                    >
+                        <svg aria-hidden="true" class="h-6 w-6" style="width:24px;height:24px" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="4" cy="5" r="2.6" />
+                            <circle cx="12" cy="5" r="2.6" />
+                            <circle cx="20" cy="5" r="2.6" />
+                            <circle cx="4" cy="19" r="2.6" />
+                            <circle cx="12" cy="19" r="2.6" />
+                            <circle cx="20" cy="19" r="2.6" />
+                        </svg>
+                    </span>
                 </div>
 
                 {!! view_render_event('bagisto.shop.categories.toolbar.pagination.after') !!}
@@ -136,7 +117,7 @@
                         },
 
                         default: {
-                            sort: '{{ $toolbar->getOrder([])['value'] }}',
+                            sort: 'created_at-desc',
 
                             limit: '{{ $toolbar->getLimit([]) }}',
 
@@ -144,7 +125,7 @@
                         },
 
                         applied: {
-                            sort: '{{ $toolbar->getOrder($params ?? [])['value'] }}',
+                            sort: '{{ $params['sort'] ?? 'created_at-desc' }}',
 
                             limit: '{{ $toolbar->getLimit($params ?? []) }}',
 
@@ -170,7 +151,9 @@
 
             computed: {
                 sortLabel() {
-                    return this.filters.available.sort.find(sort => sort.value === this.filters.applied.sort).title;
+                    const selectedSort = this.filters.available.sort.find(sort => sort.value === this.filters.applied.sort);
+
+                    return selectedSort?.value === 'created_at-desc' ? 'Newest First' : selectedSort?.title;
                 }
             },
 

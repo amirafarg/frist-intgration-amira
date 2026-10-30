@@ -9,16 +9,9 @@
 @endphp
 
 <div class="flex flex-wrap gap-4 px-4 pt-6 pb-4 shadow-sm lg:hidden">
-    <div class="flex items-center justify-between w-full">
-        <!-- Left Navigation -->
-        <div class="flex items-center gap-x-1.5">
-            {!! view_render_event('bagisto.shop.components.layouts.header.mobile.drawer.before') !!}
-
-            <!-- Drawer -->
-            <v-mobile-drawer></v-mobile-drawer>
-
-            {!! view_render_event('bagisto.shop.components.layouts.header.mobile.drawer.after') !!}
-
+    <div class="flex w-full items-center justify-between" dir="ltr">
+        <!-- Logo on the left -->
+        <div class="flex items-center">
             {!! view_render_event('bagisto.shop.components.layouts.header.mobile.logo.before') !!}
 
             <a
@@ -28,8 +21,8 @@
             >
                 <img
                     class="block"
-                    src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
-                    alt="{{ config('app.name') }}"
+                    src="{{ bagisto_asset('images/logo.svg', 'shop') }}"
+                    alt="Keswa"
                     width="131"
                     height="29"
                 >
@@ -38,9 +31,9 @@
             {!! view_render_event('bagisto.shop.components.layouts.header.mobile.logo.after') !!}
         </div>
 
-        <!-- Right Navigation -->
-        <div>
-            <div class="flex items-center gap-x-5 max-md:gap-x-4">
+        <!-- Actions and menu on the right -->
+        <div class="flex items-center gap-x-5 max-md:gap-x-4">
+                <div class="hidden">
                 {!! view_render_event('bagisto.shop.components.layouts.header.mobile.compare.before') !!}
 
                 @if($showCompare)
@@ -53,17 +46,14 @@
                 @endif
 
                 {!! view_render_event('bagisto.shop.components.layouts.header.mobile.compare.after') !!}
+                </div>
 
                 {!! view_render_event('bagisto.shop.components.layouts.header.mobile.mini_cart.before') !!}
-
-                @if(core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
-                    @include('shop::checkout.cart.mini-cart')
-                @endif
 
                 {!! view_render_event('bagisto.shop.components.layouts.header.mobile.mini_cart.after') !!}
 
                 <!-- For Large screens -->
-                <div class="max-md:hidden">
+                <div class="hidden">
                     <x-shop::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
                         <x-slot:toggle>
                             <span class="text-2xl cursor-pointer icon-users"></span>
@@ -177,7 +167,7 @@
                 </div>
 
                 <!-- For Medium and small screen -->
-                <div class="md:hidden">
+                <div class="hidden">
                     @guest('customer')
                         <a
                             href="{{ route('shop.customer.session.create') }}"
@@ -197,14 +187,19 @@
                         </a>
                     @endauth
                 </div>
+
+                {!! view_render_event('bagisto.shop.components.layouts.header.mobile.drawer.before') !!}
+
+                <v-mobile-drawer></v-mobile-drawer>
+
+                {!! view_render_event('bagisto.shop.components.layouts.header.mobile.drawer.after') !!}
             </div>
         </div>
-    </div>
 
     {!! view_render_event('bagisto.shop.components.layouts.header.mobile.search.before') !!}
 
     <!-- Serach Catalog Form -->
-    <form action="{{ route('shop.search.index') }}" class="flex items-center w-full">
+    <form action="{{ route('shop.search.index') }}" class="hidden">
         <label
             for="organic-search"
             class="sr-only"
@@ -238,18 +233,19 @@
             <x-shop::drawer
                 position="left"
                 width="100%"
+                @open="onDrawerOpen"
                 @close="onDrawerClose"
             >
                 <x-slot:toggle>
-                    <span class="text-2xl cursor-pointer icon-hamburger"></span>
+                    <span class="mobile-menu-button text-2xl cursor-pointer icon-hamburger"></span>
                 </x-slot>
 
                 <x-slot:header>
                     <div class="flex items-center justify-between">
                         <a href="{{ route('shop.home.index') }}">
                             <img
-                                src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
-                                alt="{{ config('app.name') }}"
+                                src="{{ bagisto_asset('images/logo.svg', 'shop') }}"
+                                alt="Keswa"
                                 width="131"
                                 height="29"
                             >
@@ -259,23 +255,23 @@
 
                 <x-slot:content class="!p-0">
                     <!-- Account Profile Hero Section -->
-                    <div class="p-4 border-b border-zinc-200">
-                        <div class="grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-zinc-200 p-2.5">
+                    <div class="mobile-drawer-account-hero border-b border-zinc-200 p-4">
+                        <div class="mobile-drawer-account-card grid grid-cols-[auto_1fr] items-center gap-4 rounded-xl border border-zinc-200 p-2.5">
                             <div>
                                 <img
                                 src="{{ auth()->user()?->image_url ??  bagisto_asset('images/user-placeholder.png') }}"
-                                    class="h-[60px] w-[60px] rounded-full max-md:rounded-full"
+                                    class="mobile-drawer-account-avatar h-[60px] w-[60px] rounded-full"
                                 >
                             </div>
 
                             @guest('customer')
                                 <a
                                     href="{{ route('shop.customer.session.create') }}"
-                                    class="flex text-base font-medium"
+                                    class="mobile-drawer-login-link"
                                 >
-                                    @lang('shop::app.components.layouts.header.mobile.login')
+                                    <span>@lang('shop::app.components.layouts.header.mobile.login')</span>
 
-                                    <i class="icon-double-arrow text-2xl ltr:ml-2.5 rtl:mr-2.5"></i>
+                                    <i class="icon-double-arrow"></i>
                                 </a>
                             @endguest
 
@@ -415,10 +411,10 @@
                         <div
                             v-for="category in categories"
                             :key="category.id"
-                            :class="{'mb-2': category.children && category.children.length}"
+                            :class="{'mb-1': category.children && category.children.length}"
                         >
-                        <div class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer">
-                            <a :href="category.url" class="text-base font-medium text-black">
+                            <div class="mobile-drawer-category-row flex cursor-pointer items-center justify-between py-3 transition-colors duration-200">
+                            <a :href="category.url" class="mobile-drawer-category-name text-lg text-black">
                                 @{{ category.name }}
                             </a>
                         </div>
@@ -430,10 +426,10 @@
                                     :key="secondLevelCategory.id"
                                 >
                                     <div
-                                        class="flex items-center justify-between py-2 transition-colors duration-200 cursor-pointer"
+                                        class="mobile-drawer-subcategory-row flex cursor-pointer items-center justify-between py-2 transition-colors duration-200"
                                         @click="showThirdLevel(secondLevelCategory, category, $event)"
                                     >
-                                    <a :href="secondLevelCategory.url" class="text-sm font-normal">
+                                    <a :href="secondLevelCategory.url" class="mobile-drawer-subcategory-name text-sm">
                                         @{{ secondLevelCategory.name }}
                                     </a>
 
@@ -475,7 +471,7 @@
                         >
                             <a
                                 :href="thirdLevelCategory.url"
-                                class="block py-2 text-sm transition-colors duration-200"
+                                class="mobile-drawer-subcategory-row mobile-drawer-subcategory-name block py-2 text-sm transition-colors duration-200"
                             >
                             @{{ thirdLevelCategory.name }}
                         </a>
@@ -558,7 +554,12 @@
             template: '#v-mobile-drawer-template',
 
             methods: {
+                onDrawerOpen() {
+                    document.body.classList.add('mobile-menu-open');
+                },
+
                 onDrawerClose() {
+                    document.body.classList.remove('mobile-menu-open');
                     this.$refs.mobileCategory.currentViewLevel = 'main';
                 }
             },

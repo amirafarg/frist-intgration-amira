@@ -93,8 +93,8 @@
                 <!-- Proceed Button -->
                 <div class="mt-4 flex justify-end">
                     <x-shop::button
-                        class="primary-button rounded-2xl px-11 py-3 max-md:w-full max-md:max-w-full max-md:rounded-lg"
-                        :title="trans('shop::app.checkout.onepage.address.proceed')"
+                        class="checkout-continue-payment primary-button rounded-md bg-black px-11 py-3 text-white max-md:w-full max-md:max-w-full"
+                        title="Continue to Payment"
                         ::loading="isStoring"
                         ::disabled="isStoring"
                     />

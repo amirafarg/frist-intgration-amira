@@ -31,8 +31,10 @@ class CategoryRequest extends FormRequest
             'position' => 'required|integer',
             'logo_path' => 'array',
             'logo_path.*' => 'mimes:bmp,jpeg,jpg,png,webp',
+            'logo_path_removed' => 'boolean',
             'banner_path' => 'array',
             'banner_path.*' => 'mimes:bmp,jpeg,jpg,png,webp',
+            'banner_path_removed' => 'boolean',
             'attributes' => 'required|array',
             'attributes.*' => 'required',
         ];
